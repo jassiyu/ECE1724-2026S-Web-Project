@@ -1,4 +1,4 @@
-## 1. Motivation
+# 1. Motivation
 
 ### Problem / Need
 Small event organizers (student clubs, hobby meetups) frequently run registration and check-in using Google Forms / spreadsheets. This workflow becomes fragile at the exact moment reliability matters most: **peak arrivals**. The result is a predictable set of problems:
@@ -31,7 +31,7 @@ This is also worth pursuing as a course project because the real-world needs nat
 
 ---
 
-## 2. Objective and Key Features
+# 2. Objective and Key Features
 
 ### Objective
 Build a full-stack web application that supports event setup, ticket issuance, QR code validation, and real-time check-in operations. The system supports three roles (Organizer / Staff / Attendee) and provides an end-to-end workflow: create event → issue tickets → generate QR → scan & validate → record check-in → view live attendance.
@@ -58,11 +58,11 @@ Build a full-stack web application that supports event setup, ticket issuance, Q
 - Each endpoint documents authentication requirements, allowed roles (Organizer/Staff/Attendee), and example request/response payloads
 
 ---
-# Basic Features
+## Basic Features
 
-## 1) Core Features
+### 1) Core Features
 
-### A) Authentication and Authorization (Advanced Feature #1)
+#### A) Authentication and Authorization (Advanced Feature #1)
 - User registration and login.
 - Session-based auth or JWT + refresh token.
 - Role-based access:
@@ -71,28 +71,28 @@ Build a full-stack web application that supports event setup, ticket issuance, Q
  - **Attendee**: claim/view tickets in "My Tickets".
 - Authorization enforced in backend middleware 
 
-### B) Event Management
+#### B) Event Management
 - Organizer creates/edits events: title, description, venue, start/end time, capacity.
 - Organizer configures ticket types: name, price, quantity, sale window.
 - Organizer assigns/removes staff for each event.
 
-### C) Ticket + QR Issuance
+#### C) Ticket + QR Issuance
 - Attendee claims a ticket (MVP: free claim).
 - Backend creates `Ticket` with unique opaque `qrToken`.
 - Frontend renders QR from token only (no sensitive data in payload).
 
-### D) Check-In Validation
+#### D) Check-In Validation
 - Staff scans QR (camera + manual fallback).
 - Frontend sends token to backend validation endpoint.
 - Backend verifies ticket ownership/event match/status/duplicate usage.
 - On success, backend writes `CheckIn` (time + staff ID).
 
-### E) Real-Time Dashboard
+#### E) Real-Time Dashboard
 - Live checked-in count vs capacity.
 - Recent scan feed + invalid/duplicate alerts.
 - Implemented with Socket.IO rooms
 
-### F) Cloud File Storage
+#### F) Cloud File Storage
 - Upload/display event poster (PNG/JPG), optional venue map (PDF).
 - Frontend uploads via pre-signed URL.
 - Backend stores file metadata and links to `Event`.
@@ -100,23 +100,23 @@ Build a full-stack web application that supports event setup, ticket issuance, Q
 
 ---
 
-## 2) MVP Scope
+### 2) MVP Scope
 
-### In-Scope
+#### In-Scope
 - Event creation/editing, ticket type setup, staff assignment.
 - Ticket claim + QR display in "My Tickets".
 - Staff validation/check-in flow with duplicate prevention.
 - Live attendance updates on the dashboard.
 - Poster upload and display.
 
-### Out-of-Scope
+#### Out-of-Scope
 - Payments/refunds.
 - Discount codes, waitlist, custom registration forms.
 - Email/SMS notifications.
 - Advanced analytics.
 - Multi-tenant organization/billing.
 
-### Success Metrics
+#### Success Metrics
 - Check-in validation typically completes within **3 seconds** in demo conditions.
 - Re-scan of an already used ticket returns `already_used`.
 - Unauthorized role actions are blocked by protected APIs.
@@ -126,7 +126,7 @@ Build a full-stack web application that supports event setup, ticket issuance, Q
 
 ---
 
-## 3) Database Model
+### 3) Database Model
 
 Use **PostgreSQL + Prisma** 
 
@@ -146,7 +146,7 @@ Use **PostgreSQL + Prisma**
 
 ---
 
-## 4) REST API (MVP)
+### 4) REST API (MVP)
 
 **Auth**
 - `POST /auth/register`
@@ -185,7 +185,7 @@ Use **PostgreSQL + Prisma**
 
 ---
 
-## 5) UI Scope
+### 5) UI Scope
 
 - **Public:** event list + event detail.
 - **Attendee:** "My Tickets" + QR ticket detail.
@@ -195,9 +195,9 @@ Use **PostgreSQL + Prisma**
 
 
 
-### Planned Advanced Features
+#### Planned Advanced Features
 
-#### Advanced Feature #1: User Authentication and Authorization
+##### Advanced Feature #1: User Authentication and Authorization
 Registration and login for all users
 Token- or session-based authentication (e.g., JWT + refresh token or session cookies)
 Protected routes/APIs enforced by Express middleware (requireAuth)
@@ -207,7 +207,7 @@ Staff: scan/check-in for assigned events only
 Attendee: claim/view tickets (“My Tickets”)
 Authorization checks are performed server-side (not only in the frontend)
 
-#### Advanced Feature #2: Real-Time Functionality (Live check-in dashboard)
+##### Advanced Feature #2: Real-Time Functionality (Live check-in dashboard)
 Organizers (and staff) see live updates without refresh:
 checked-in count vs capacity
 recent scan activity feed
@@ -215,16 +215,16 @@ alerts for invalid/duplicate scans
 Real-time updates are delivered via WebSockets (Socket.IO) from the Express backend, with clients subscribing to an event-specific channel/room.
 ---
 
-### Scope and feasibility
+#### Scope and feasibility
 The MVP will focus on the main end-to-end workflow of the system: an organizer creates an event and ticket types, an attendee claims a ticket and receives a QR code, staff scan and validate the QR to check the attendee in, and the organizer dashboard shows the updated attendance (with live updates for the real-time requirement). This scope covers the core project requirements: a React frontend + Express REST backend, a relational database for ticket/check-in records, and cloud storage for event assets.
 
 To keep the workload manageable, features will be built in small modules (auth/RBAC, event management, ticket issuing, check-in validation, dashboard, file upload) and integrated step by step. Optional features like paid checkout, discount codes, waitlist, email confirmations, and custom registration forms will only be attempted after the MVP is stable.
 
 ---
 
-## 3. Tentative Plan
+# 3. Tentative Plan
 
-### Team roles and responsibilities (4 members)
+## Team roles and responsibilities (4 members)
 - **Member 1: Project lead and backend developer**  
   Define endpoints and data flow.<br>
   Implement core event, ticket, and check-in logic.<br>
@@ -245,7 +245,7 @@ To keep the workload manageable, features will be built in small modules (auth/R
   Implement event asset upload and display.<br>
   Maintain API documentation and run final QA checks.
 
-### week-by-week plan
+## week-by-week plan
 **Week 1: Foundation**
 - Set up repo, branch workflow, and basic app structure.
 - Create initial pages for Event List and Event Details.
@@ -277,7 +277,7 @@ To keep the workload manageable, features will be built in small modules (auth/R
 - Finalize API documentation and prepare the demo script.
 ---
 
-## 4. Initial Independent Reasoning
+# 4. Initial Independent Reasoning
 
 ### Application structure and architecture
 
@@ -326,7 +326,7 @@ Coordination through a shared task board and PR reviews aimed to prevent integra
 
 ---
 
-## 5. AI Assistance Disclosure
+# 5. AI Assistance Disclosure
 
 ### Developed without AI
 
@@ -345,7 +345,7 @@ AI suggested including identifiers in the QR payload. We chose instead to use an
 
 ---
 
-## References
+# References
 
 [1] S. G. Powell, K. R. Baker, and B. Lawson, “A critical review of the literature on spreadsheet errors,” *Decision Support Systems*, vol. 46, no. 1, pp. 128–138, Dec. 2008, doi: 10.1016/j.dss.2008.06.001.
 
