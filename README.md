@@ -36,28 +36,31 @@ This is also worth pursuing as a course project because the real-world needs nat
 ### Objective
 Build a full-stack web application that supports event setup, ticket issuance, QR code validation, and real-time check-in operations. The system supports three roles (Organizer / Staff / Attendee) and provides an end-to-end workflow: create event → issue tickets → generate QR → scan & validate → record check-in → view live attendance.
 
+---
+
 ### Architecture (Technical implementation approach)
 **Option B: Separate Frontend & Backend**
 
 #### Frontend
-- React + TypeScript
-- Tailwind CSS for styling
-- shadcn/ui for UI components
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS](https://tailwindcss.com/docs) for styling
+- [shadcn/ui](https://ui.shadcn.com/docs) for UI components
 - Responsive UI: desktop organizer console + mobile-first staff scanner page
-- Redux Toolkit for shared UI state (filters, selected event context, recent scan results)
+- [Redux Toolkit](https://redux-toolkit.js.org/) for shared UI state (filters, selected event context, recent scan results)
 
 #### Backend
-- Express.js + TypeScript
+- [Express.js](https://expressjs.com/) + [TypeScript](https://www.typescriptlang.org/docs/)
 - RESTful API providing resources for events, ticket types, tickets, check-ins, and files
-- Relational database: PostgreSQL
-- Cloud storage integration: S3-compatible object storage for event assets
+- Relational database: [PostgreSQL](https://www.postgresql.org/docs/)
+- Cloud storage integration: S3-compatible object storage ([Amazon S3 API Reference](https://docs.aws.amazon.com/AmazonS3/latest/API/Type_API_Reference.html)) for event assets
 
 #### API Documentation
-- OpenAPI (Swagger) specification for all REST endpoints
-- Swagger UI served at /docs
+- [OpenAPI (Swagger)](https://swagger.io/specification/) specification for all REST endpoints
+- [Swagger UI](https://swagger.io/tools/swagger-ui/) served at /docs
 - Each endpoint documents authentication requirements, allowed roles (Organizer/Staff/Attendee), and example request/response payloads
 
 ---
+
 ## Basic Features
 
 ### 1) Core Features
@@ -198,24 +201,25 @@ Use **PostgreSQL + Prisma**
 ## Planned Advanced Features
 
 ### Advanced Feature #1: User Authentication and Authorization
-Registration and login for all users
-Token- or session-based authentication (e.g., JWT + refresh token or session cookies)
-Protected routes/APIs enforced by Express middleware (requireAuth)
-Role-based access control (requireRole) for Organizer / Staff / Attendee actions:
-Organizer: create/manage events, assign staff, view analytics
-Staff: scan/check-in for assigned events only
-Attendee: claim/view tickets (“My Tickets”)
-Authorization checks are performed server-side (not only in the frontend)
+- Registration and login for all users
+- Token- or session-based authentication (e.g., JWT + refresh token or session cookies)
+- Protected routes/APIs enforced by Express middleware (requireAuth)
+- Role-based access control (requireRole) for Organizer / Staff / Attendee actions:
+  - Organizer: create/manage events, assign staff, view analytics
+  - Staff: scan/check-in for assigned events only
+  - Attendee: claim/view tickets (“My Tickets”)
+- Authorization checks are performed server-side (not only in the frontend)
 
 ### Advanced Feature #2: Real-Time Functionality (Live check-in dashboard)
-Organizers (and staff) see live updates without refresh:
-checked-in count vs capacity
-recent scan activity feed
-alerts for invalid/duplicate scans
-Real-time updates are delivered via WebSockets (Socket.IO) from the Express backend, with clients subscribing to an event-specific channel/room.
+- Organizers (and staff) see live updates without refresh:
+  - checked-in count vs capacity
+  - recent scan activity feed
+  - alerts for invalid/duplicate scans
+- Real-time updates are delivered via WebSockets (Socket.IO) from the Express backend, with clients subscribing to an event-specific channel/room.
+
 ---
 
-### Scope and feasibility
+## Scope and feasibility
 The MVP will focus on the main end-to-end workflow of the system: an organizer creates an event and ticket types, an attendee claims a ticket and receives a QR code, staff scan and validate the QR to check the attendee in, and the organizer dashboard shows the updated attendance (with live updates for the real-time requirement). This scope covers the core project requirements: a React frontend + Express REST backend, a relational database for ticket/check-in records, and cloud storage for event assets.
 
 To keep the workload manageable, features will be built in small modules (auth/RBAC, event management, ticket issuing, check-in validation, dashboard, file upload) and integrated step by step. Optional features like paid checkout, discount codes, waitlist, email confirmations, and custom registration forms will only be attempted after the MVP is stable.
