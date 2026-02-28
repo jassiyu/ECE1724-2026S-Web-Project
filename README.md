@@ -195,9 +195,9 @@ Use **PostgreSQL + Prisma**
 
 
 
-#### Planned Advanced Features
+## Planned Advanced Features
 
-##### Advanced Feature #1: User Authentication and Authorization
+### Advanced Feature #1: User Authentication and Authorization
 Registration and login for all users
 Token- or session-based authentication (e.g., JWT + refresh token or session cookies)
 Protected routes/APIs enforced by Express middleware (requireAuth)
@@ -207,7 +207,7 @@ Staff: scan/check-in for assigned events only
 Attendee: claim/view tickets (“My Tickets”)
 Authorization checks are performed server-side (not only in the frontend)
 
-##### Advanced Feature #2: Real-Time Functionality (Live check-in dashboard)
+### Advanced Feature #2: Real-Time Functionality (Live check-in dashboard)
 Organizers (and staff) see live updates without refresh:
 checked-in count vs capacity
 recent scan activity feed
@@ -215,7 +215,7 @@ alerts for invalid/duplicate scans
 Real-time updates are delivered via WebSockets (Socket.IO) from the Express backend, with clients subscribing to an event-specific channel/room.
 ---
 
-#### Scope and feasibility
+### Scope and feasibility
 The MVP will focus on the main end-to-end workflow of the system: an organizer creates an event and ticket types, an attendee claims a ticket and receives a QR code, staff scan and validate the QR to check the attendee in, and the organizer dashboard shows the updated attendance (with live updates for the real-time requirement). This scope covers the core project requirements: a React frontend + Express REST backend, a relational database for ticket/check-in records, and cloud storage for event assets.
 
 To keep the workload manageable, features will be built in small modules (auth/RBAC, event management, ticket issuing, check-in validation, dashboard, file upload) and integrated step by step. Optional features like paid checkout, discount codes, waitlist, email confirmations, and custom registration forms will only be attempted after the MVP is stable.
