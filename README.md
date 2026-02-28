@@ -224,23 +224,23 @@ To keep the workload manageable, features will be built in small modules (auth/R
 
 # 3. Tentative Plan
 
-## Team roles and responsibilities (4 members)
-- **Member 1: Project lead and backend developer**  
+## Team roles and responsibilities
+- **Ruifan: Project lead and backend developer**  
   Define endpoints and data flow.<br>
   Implement core event, ticket, and check-in logic.<br>
   Review pull requests and keep features integrated.
 
-- **Member 2: Frontend developer**  
+- **Siyu: Frontend developer**  
   Build the main pages for attendees and organizers.<br>
   Implement navigation and core UI states.<br>
   Ensure the app is responsive on desktop and mobile.
 
-- **Member 3: Check-in and QR workflow developer**  
+- **Yuye: Check-in and QR workflow developer**  
   Build the staff scanning experience.<br>
   Implement validation results and duplicate handling UI.<br>
   Test scanning flow end-to-end with realistic scenarios.
 
-- **Member 4: Real-time, files, and documentation developer**  
+- **Jenny: Real-time, files, and documentation developer**  
   Implement live dashboard updates for check-ins.<br>
   Implement event asset upload and display.<br>
   Maintain API documentation and run final QA checks.
