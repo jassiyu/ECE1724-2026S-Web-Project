@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ORGANIZER
+  STAFF
+  ATTENDEE
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  createdAt    DateTime @default(now())
+
+  organizedEvents Event[]      @relation("EventOrganizer")
+  staffEvents     EventStaff[]
+  tickets         Ticket[]
+  checkIns        CheckIn[]    @relation("CheckInStaff")
+  files           FileObject[]
+}
+
+model Event {
+  id           String   @id @default(uuid())
+  organizerId  String
+  title        String
+  description  String?
+  venue        String?
+  startAt      DateTime
+  endAt        DateTime
+  capacity     Int
+  posterFileId String?
+  createdAt    DateTime @default(now())
+
+  organizer   User         @relation("EventOrganizer", fields: [organizerId], references: [id])
+  posterFile  FileObject?  @relation(fields: [posterFileId], references: [id])
+  staff       EventStaff[]
+  ticketTypes TicketType[]
+  tickets     Ticket[]
+  checkIns    CheckIn[]
+}
+
+model EventStaff {
+  eventId String
+  userId  String
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+}
+
+model TicketType {
+  id           String    @id @default(uuid())
+  eventId      String
+  name         String
+  priceCents   Int       @default(0)
+  quantity     Int
+  salesStartAt DateTime?
+  salesEndAt   DateTime?
+
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tickets Ticket[]
+}
+
+model Ticket {
+  id           String       @id @default(uuid())
+  eventId      String
+  ticketTypeId String
+  ownerId      String
+  status       TicketStatus @default(VALID)
+  qrToken      String       @unique @default(uuid())
+  createdAt    DateTime     @default(now())
+
+  event      Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType TicketType @relation(fields: [ticketTypeId], references: [id])
+  owner      User       @relation(fields: [ownerId], references: [id])
+  checkIn    CheckIn?
+}
+
+model CheckIn {
+  id           String   @id @default(uuid())
+  ticketId     String   @unique
+  eventId      String
+  checkedInBy  String
+  checkedInAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+  event  Event  @relation(fields: [eventId], references: [id])
+  staff  User   @relation("CheckInStaff", fields: [checkedInBy], references: [id])
+}
+
+model FileObject {
+  id           String   @id @default(uuid())
+  ownerId      String
+  bucketKey    String   @unique
+  mimeType     String
+  sizeBytes    Int
+  originalName String
+  createdAt    DateTime @default(now())
+
+  owner  User    @relation(fields: [ownerId], references: [id])
+  events Event[]
+}
