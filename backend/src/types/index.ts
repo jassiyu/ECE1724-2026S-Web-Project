@@ -141,6 +141,17 @@ export interface TicketDTO {
   status: TicketStatus;
   qrToken: string;
   createdAt: Date;
+  event?: {
+    id: string;
+    title: string;
+    venue: string | null;
+    startAt: Date;
+  };
+  ticketType?: {
+    id: string;
+    name: string;
+    priceCents: number;
+  };
 }
 
 // ─── DTOs: Check-In ──────────────────────────────────────
@@ -159,7 +170,7 @@ export interface CheckInDTO {
 
 export type CheckInResult =
   | { status: "success"; checkIn: CheckInDTO; ticket: TicketDTO }
-  | { status: "already_used"; checkIn: CheckInDTO }
+  | { status: "already_used"; checkIn?: CheckInDTO }
   | { status: "invalid_ticket" }
   | { status: "wrong_event" }
   | { status: "cancelled" };

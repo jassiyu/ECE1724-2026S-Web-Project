@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CheckInResult } from "../../types";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { CheckInResult } from "../../types";
 
 interface ScanState {
   lastResult: CheckInResult | null;
@@ -25,6 +26,7 @@ const scanSlice = createSlice({
     },
     clearScanResult(state) {
       state.lastResult = null;
+      state.isScanning = false;
     },
   },
 });

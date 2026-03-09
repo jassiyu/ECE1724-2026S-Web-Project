@@ -1,7 +1,8 @@
 import { Router, Response, NextFunction } from "express";
-import { AuthenticatedRequest, UserRole } from "../types";
+import { AppError, AuthenticatedRequest, UserRole } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
 import { requireRole } from "../middleware/role.middleware";
+import { ticketService } from "../services/ticket.service";
 
 const router = Router();
 
@@ -12,12 +13,20 @@ eventTicketsRouter.post(
   "/",
   requireAuth,
   requireRole(UserRole.ATTENDEE),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const ticket = await ticketService.claimTicket(req.params.eventId, req.user!.userId, req.body);
-      // res.status(201).json(ticket);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const ticket = await ticketService.claimTicket(
+        eventId,
+        req.user!.userId,
+        req.body
+      );
+      res.status(201).json(ticket);
     } catch (err) {
       next(err);
     }
@@ -29,12 +38,10 @@ router.get(
   "/",
   requireAuth,
   requireRole(UserRole.ATTENDEE),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const tickets = await ticketService.getMyTickets(req.user!.userId);
-      // res.json(tickets);
-      throw new Error("Not implemented");
+      const tickets = await ticketService.getMyTickets(req.user!.userId);
+      res.json(tickets);
     } catch (err) {
       next(err);
     }
@@ -47,12 +54,19 @@ export const singleTicketRouter = Router();
 singleTicketRouter.get(
   "/:ticketId",
   requireAuth,
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const ticket = await ticketService.getTicket(req.params.ticketId, req.user!.userId);
-      // res.json(ticket);
-      throw new Error("Not implemented");
+      const ticketParam = req.params.ticketId;
+      const ticketId = Array.isArray(ticketParam) ? ticketParam[0] : ticketParam;
+      if (!ticketId) {
+        throw AppError.badRequest("Missing ticketId");
+      }
+
+      const ticket = await ticketService.getTicket(
+        ticketId,
+        req.user!.userId
+      );
+      res.json(ticket);
     } catch (err) {
       next(err);
     }
