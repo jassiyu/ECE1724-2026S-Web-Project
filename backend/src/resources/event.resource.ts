@@ -2,19 +2,22 @@ import { Router, Response, NextFunction } from "express";
 import { AuthenticatedRequest, UserRole } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
 import { requireRole } from "../middleware/role.middleware";
+import { eventService } from "../services/event.service";
 
 const router = Router();
 
 // GET /events
 router.get(
   "/",
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const filters = { search: req.query.search, upcoming: req.query.upcoming };
-      // const events = await eventService.listEvents(filters);
-      // res.json(events);
-      throw new Error("Not implemented");
+      const filters = {
+        search: req.query.search as string | undefined,
+        upcoming: req.query.upcoming === "true" ? true : undefined,
+        organizerId: req.query.organizerId as string | undefined,
+      };
+      const events = await eventService.listEvents(filters);
+      res.json(events);
     } catch (err) {
       next(err);
     }
@@ -24,12 +27,10 @@ router.get(
 // GET /events/:eventId
 router.get(
   "/:eventId",
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const event = await eventService.getEvent(req.params.eventId);
-      // res.json(event);
-      throw new Error("Not implemented");
+      const event = await eventService.getEvent(req.params.eventId as string);
+      res.json(event);
     } catch (err) {
       next(err);
     }
@@ -41,12 +42,10 @@ router.post(
   "/",
   requireAuth,
   requireRole(UserRole.ORGANIZER),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const event = await eventService.createEvent(req.user!.userId, req.body);
-      // res.status(201).json(event);
-      throw new Error("Not implemented");
+      const event = await eventService.createEvent(req.user!.userId, req.body);
+      res.status(201).json(event);
     } catch (err) {
       next(err);
     }
@@ -58,12 +57,14 @@ router.put(
   "/:eventId",
   requireAuth,
   requireRole(UserRole.ORGANIZER),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const event = await eventService.updateEvent(req.params.eventId, req.user!.userId, req.body);
-      // res.json(event);
-      throw new Error("Not implemented");
+      const event = await eventService.updateEvent(
+        req.params.eventId as string,
+        req.user!.userId,
+        req.body
+      );
+      res.json(event);
     } catch (err) {
       next(err);
     }
@@ -75,12 +76,10 @@ router.get(
   "/:eventId/dashboard",
   requireAuth,
   requireRole(UserRole.ORGANIZER, UserRole.STAFF),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const dashboard = await eventService.getDashboard(req.params.eventId);
-      // res.json(dashboard);
-      throw new Error("Not implemented");
+      const dashboard = await eventService.getDashboard(req.params.eventId as string);
+      res.json(dashboard);
     } catch (err) {
       next(err);
     }
