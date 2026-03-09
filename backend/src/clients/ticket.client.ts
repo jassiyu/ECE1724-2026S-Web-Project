@@ -1,5 +1,6 @@
-import { Ticket } from "@prisma/client";
+import { Ticket, TicketStatus as PrismaTicketStatus } from "@prisma/client";
 import { TicketStatus } from "../types";
+import prisma from "./prisma.client";
 
 export interface ITicketClient {
   findById(id: string): Promise<Ticket | null>;
@@ -18,48 +19,58 @@ export interface ITicketClient {
   countByTicketType(ticketTypeId: string): Promise<number>;
 }
 
-// TODO: Implement TicketClient using prisma
 export class TicketClient implements ITicketClient {
-  async findById(_id: string): Promise<Ticket | null> {
-    // TODO: prisma.ticket.findUnique({ where: { id } })
-    throw new Error("Not implemented");
+  async findById(id: string): Promise<Ticket | null> {
+    return prisma.ticket.findUnique({
+      where: { id },
+      include: { event: true, ticketType: true },
+    });
   }
 
-  async findByQrToken(_qrToken: string): Promise<Ticket | null> {
-    // TODO: prisma.ticket.findUnique({ where: { qrToken } })
-    throw new Error("Not implemented");
+  async findByQrToken(qrToken: string): Promise<Ticket | null> {
+    return prisma.ticket.findUnique({ where: { qrToken } });
   }
 
-  async findByOwner(_ownerId: string): Promise<Ticket[]> {
-    // TODO: prisma.ticket.findMany({ where: { ownerId }, include: { event: true, ticketType: true } })
-    throw new Error("Not implemented");
+  async findByOwner(ownerId: string): Promise<Ticket[]> {
+    return prisma.ticket.findMany({
+      where: { ownerId },
+      include: { event: true, ticketType: true },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   async findByEventAndOwner(
-    _eventId: string,
-    _ownerId: string
+    eventId: string,
+    ownerId: string
   ): Promise<Ticket | null> {
-    // TODO: prisma.ticket.findFirst({ where: { eventId, ownerId } })
-    throw new Error("Not implemented");
+    return prisma.ticket.findFirst({
+      where: { eventId, ownerId },
+    });
   }
 
-  async create(_data: {
+  async create(data: {
     eventId: string;
     ticketTypeId: string;
     ownerId: string;
   }): Promise<Ticket> {
-    // TODO: prisma.ticket.create({ data })
-    throw new Error("Not implemented");
+    return prisma.ticket.create({ data });
   }
 
-  async updateStatus(_id: string, _status: TicketStatus): Promise<Ticket> {
-    // TODO: prisma.ticket.update({ where: { id }, data: { status } })
-    throw new Error("Not implemented");
+  async updateStatus(id: string, status: TicketStatus): Promise<Ticket> {
+    const statusMap: Record<TicketStatus, PrismaTicketStatus> = {
+      [TicketStatus.VALID]: PrismaTicketStatus.VALID,
+      [TicketStatus.USED]: PrismaTicketStatus.USED,
+      [TicketStatus.CANCELLED]: PrismaTicketStatus.CANCELLED,
+    };
+
+    return prisma.ticket.update({
+      where: { id },
+      data: { status: statusMap[status] },
+    });
   }
 
-  async countByTicketType(_ticketTypeId: string): Promise<number> {
-    // TODO: prisma.ticket.count({ where: { ticketTypeId } })
-    throw new Error("Not implemented");
+  async countByTicketType(ticketTypeId: string): Promise<number> {
+    return prisma.ticket.count({ where: { ticketTypeId } });
   }
 }
 

@@ -1,7 +1,8 @@
 import { Router, Response, NextFunction } from "express";
-import { AuthenticatedRequest, UserRole } from "../types";
+import { AppError, AuthenticatedRequest, UserRole } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
 import { requireRole } from "../middleware/role.middleware";
+import { checkInService } from "../services/checkin.service";
 
 const router = Router({ mergeParams: true });
 
@@ -10,16 +11,20 @@ router.post(
   "/validate",
   requireAuth,
   requireRole(UserRole.STAFF),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const result = await checkInService.validateAndCheckIn(
-      //   req.params.eventId,
-      //   req.body.qrToken,
-      //   req.user!.userId
-      // );
-      // res.json(result);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const result = await checkInService.validateAndCheckIn(
+        eventId,
+        req.body.qrToken,
+        req.user!.userId
+      );
+      res.json(result);
     } catch (err) {
       next(err);
     }
@@ -31,13 +36,19 @@ router.get(
   "/recent",
   requireAuth,
   requireRole(UserRole.ORGANIZER, UserRole.STAFF),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const limit = parseInt(req.query.limit as string) || 20;
-      // const checkIns = await checkInService.getRecentCheckIns(req.params.eventId, limit);
-      // res.json(checkIns);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const rawLimit = parseInt(req.query.limit as string, 10);
+      const limit = Number.isNaN(rawLimit) ? 20 : rawLimit;
+
+      const checkIns = await checkInService.getRecentCheckIns(eventId, limit);
+      res.json(checkIns);
     } catch (err) {
       next(err);
     }
