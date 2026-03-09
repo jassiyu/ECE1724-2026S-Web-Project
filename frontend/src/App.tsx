@@ -12,7 +12,7 @@ import MyTicketsPage from "./pages/MyTicketsPage";
 import TicketDetailPage from "./pages/TicketDetailPage";
 import ScannerPage from "./pages/ScannerPage";
 import { useAppSelector } from "./store/hooks";
-import { UserRole } from "./types";
+import type { UserRole } from "./types";
 
 function ProtectedRoute() {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
@@ -49,19 +49,19 @@ function AppLayout() {
             <Link to="/events" className="hover:underline">
               Events
             </Link>
-            {auth.isAuthenticated && auth.user?.role === UserRole.ATTENDEE && (
+            {auth.isAuthenticated && auth.user?.role === "ATTENDEE" && (
               <Link to="/my-tickets" className="hover:underline">
                 My Tickets
               </Link>
             )}
-            {auth.isAuthenticated && auth.user?.role === UserRole.ORGANIZER && (
+            {auth.isAuthenticated && auth.user?.role === "ORGANIZER" && (
               <>
                 <Link to="/events/new" className="hover:underline">
                   Create Event
                 </Link>
               </>
             )}
-            {auth.isAuthenticated && auth.user?.role === UserRole.STAFF && (
+            {auth.isAuthenticated && auth.user?.role === "STAFF" && (
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium">
                 Staff
               </span>
@@ -108,7 +108,7 @@ export default function App() {
         {/* Auth-only routes */}
         <Route element={<ProtectedRoute />}>
           {/* Organizer */}
-          <Route element={<RoleGuard allowedRoles={[UserRole.ORGANIZER]} />}>
+          <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
             <Route path="/events/new" element={<CreateEventPage />} />
             <Route path="/events/:eventId/edit" element={<EditEventPage />} />
             <Route
@@ -122,7 +122,7 @@ export default function App() {
           </Route>
 
           {/* Attendee */}
-          <Route element={<RoleGuard allowedRoles={[UserRole.ATTENDEE]} />}>
+          <Route element={<RoleGuard allowedRoles={["ATTENDEE"]} />}>
             <Route path="/my-tickets" element={<MyTicketsPage />} />
             <Route
               path="/my-tickets/:ticketId"
@@ -131,7 +131,7 @@ export default function App() {
           </Route>
 
           {/* Staff */}
-          <Route element={<RoleGuard allowedRoles={[UserRole.STAFF]} />}>
+          <Route element={<RoleGuard allowedRoles={["STAFF"]} />}>
             <Route path="/scan/:eventId" element={<ScannerPage />} />
           </Route>
         </Route>
