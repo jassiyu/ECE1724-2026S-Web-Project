@@ -29,7 +29,7 @@ export default function RegisterPage() {
       setIsLoading(true);
 
       const response = await authApi.register({
-        // name: name.trim(),
+        name: name.trim(),
         email: email.trim(),
         password,
         role,

@@ -2,6 +2,7 @@ import apiClient from "./client";
 import type { AuthResponse, UserDTO, UserRole } from "../types";
 
 export interface RegisterInput {
+  name: string;
   email: string;
   password: string;
   role: UserRole;
