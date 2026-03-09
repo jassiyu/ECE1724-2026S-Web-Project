@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import { AuthResponse, UserDTO, UserRole } from "../types";
+import type { AuthResponse, UserDTO, UserRole } from "../types";
 
 export interface RegisterInput {
   email: string;
@@ -14,22 +14,21 @@ export interface LoginInput {
 
 export const authApi = {
   register(input: RegisterInput): Promise<AuthResponse> {
-    // TODO: return apiClient.post('/auth/register', input).then(r => r.data);
-    throw new Error("Not implemented");
+    return apiClient.post("/auth/register", input).then((r) => r.data);
   },
 
   login(input: LoginInput): Promise<AuthResponse> {
-    // TODO: return apiClient.post('/auth/login', input).then(r => r.data);
-    throw new Error("Not implemented");
+    return apiClient.post("/auth/login", input).then((r) => r.data);
   },
 
   logout(): Promise<void> {
-    // TODO: return apiClient.post('/auth/logout').then(r => r.data);
-    throw new Error("Not implemented");
+    // Server may clear cookie/session; client-side token cleanup happens in authSlice/UI.
+    return apiClient.post("/auth/logout").then(() => {
+      return;
+    });
   },
 
   getMe(): Promise<UserDTO> {
-    // TODO: return apiClient.get('/auth/me').then(r => r.data);
-    throw new Error("Not implemented");
+    return apiClient.get("/auth/me").then((r) => r.data);
   },
 };
