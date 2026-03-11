@@ -1,16 +1,8 @@
-// ─── Enums ───────────────────────────────────────────────
+// ─── Literal Types ───────────────────────────────────────────────
 
-export enum UserRole {
-  ORGANIZER = "ORGANIZER",
-  STAFF = "STAFF",
-  ATTENDEE = "ATTENDEE",
-}
+export type UserRole = "ORGANIZER" | "STAFF" | "ATTENDEE";
 
-export enum TicketStatus {
-  VALID = "VALID",
-  USED = "USED",
-  CANCELLED = "CANCELLED",
-}
+export type TicketStatus = "VALID" | "USED" | "CANCELLED";
 
 // ─── Auth ────────────────────────────────────────────────
 
