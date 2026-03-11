@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ticketsApi } from "../api/tickets.api";
 import type { TicketDTO } from "../types";
-import { TicketStatus } from "../types";
+import type{ TicketStatus } from "../types";
 
 function formatDate(value: string | undefined): string {
   if (!value) return "TBD";
@@ -10,9 +10,9 @@ function formatDate(value: string | undefined): string {
 }
 
 const statusStyles: Record<TicketStatus, string> = {
-  [TicketStatus.VALID]: "bg-green-100 text-green-700",
-  [TicketStatus.USED]: "bg-amber-100 text-amber-700",
-  [TicketStatus.CANCELLED]: "bg-red-100 text-red-700",
+  VALID: "bg-green-100 text-green-700",
+  USED: "bg-amber-100 text-amber-700",
+  CANCELLED: "bg-red-100 text-red-700",
 };
 
 export default function MyTicketsPage() {
