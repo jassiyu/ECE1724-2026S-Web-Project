@@ -26,6 +26,7 @@ const scanSlice = createSlice({
     },
     clearScanResult(state) {
       state.lastResult = null;
+      state.isScanning = false;
     },
   },
 });

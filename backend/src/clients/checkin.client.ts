@@ -1,4 +1,5 @@
 import { CheckIn } from "@prisma/client";
+import prisma from "./prisma.client";
 
 export interface ICheckInClient {
   findByTicketId(ticketId: string): Promise<CheckIn | null>;
@@ -11,33 +12,32 @@ export interface ICheckInClient {
   }): Promise<CheckIn>;
 }
 
-// TODO: Implement CheckInClient using prisma
 export class CheckInClient implements ICheckInClient {
-  async findByTicketId(_ticketId: string): Promise<CheckIn | null> {
-    // TODO: prisma.checkIn.findUnique({ where: { ticketId } })
-    throw new Error("Not implemented");
+  async findByTicketId(ticketId: string): Promise<CheckIn | null> {
+    return prisma.checkIn.findUnique({ where: { ticketId } });
   }
 
   async findRecentByEvent(
-    _eventId: string,
-    _limit = 20
+    eventId: string,
+    limit = 20
   ): Promise<CheckIn[]> {
-    // TODO: prisma.checkIn.findMany({ where: { eventId }, orderBy: { checkedInAt: 'desc' }, take: limit })
-    throw new Error("Not implemented");
+    return prisma.checkIn.findMany({
+      where: { eventId },
+      orderBy: { checkedInAt: "desc" },
+      take: limit,
+    });
   }
 
-  async countByEvent(_eventId: string): Promise<number> {
-    // TODO: prisma.checkIn.count({ where: { eventId } })
-    throw new Error("Not implemented");
+  async countByEvent(eventId: string): Promise<number> {
+    return prisma.checkIn.count({ where: { eventId } });
   }
 
-  async create(_data: {
+  async create(data: {
     ticketId: string;
     eventId: string;
     checkedInBy: string;
   }): Promise<CheckIn> {
-    // TODO: prisma.checkIn.create({ data })
-    throw new Error("Not implemented");
+    return prisma.checkIn.create({ data });
   }
 }
 

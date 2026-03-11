@@ -1,20 +1,27 @@
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../types";
+import jwt from "jsonwebtoken";
+import { AuthenticatedRequest, JwtPayload } from "../types";
 
-/**
- * Middleware: verifies JWT from Authorization header,
- * attaches decoded payload to req.user.
- */
+const JWT_SECRET = process.env.JWT_SECRET || "change-me-in-production";
+
 export function requireAuth(
-  _req: AuthenticatedRequest,
-  _res: Response,
-  _next: NextFunction
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
 ): void {
-  // TODO:
-  // 1. Extract token from `Authorization: Bearer <token>` header
-  // 2. Verify token using jsonwebtoken.verify(token, JWT_SECRET)
-  // 3. Attach decoded payload { userId, email, role } to req.user
-  // 4. Call next()
-  // 5. On failure: res.status(401).json({ error: 'Unauthorized' })
-  throw new Error("Not implemented");
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized", code: "UNAUTHORIZED" });
+    return;
+  }
+
+  const token = header.slice(7);
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json({ error: "Unauthorized", code: "UNAUTHORIZED" });
+  }
 }
