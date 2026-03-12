@@ -1,6 +1,7 @@
 import { Router, Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../types";
+import { AppError, AuthenticatedRequest } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
+import { fileService } from "../services/file.service";
 
 const router = Router();
 
@@ -8,12 +9,10 @@ const router = Router();
 router.post(
   "/presign-upload",
   requireAuth,
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const result = await fileService.presignUpload(req.user!.userId, req.body);
-      // res.json(result);
-      throw new Error("Not implemented");
+      const result = await fileService.presignUpload(req.user!.userId, req.body);
+      res.json(result);
     } catch (err) {
       next(err);
     }
@@ -23,12 +22,17 @@ router.post(
 // GET /files/:fileId/download
 router.get(
   "/:fileId/download",
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const url = await fileService.getDownloadUrl(req.params.fileId);
-      // res.redirect(url);
-      throw new Error("Not implemented");
+      const fileIdParam = req.params.fileId;
+      const rawFileId = Array.isArray(fileIdParam) ? fileIdParam[0] : fileIdParam;
+      const fileId = rawFileId?.trim();
+      if (!fileId) {
+        throw AppError.badRequest("Missing fileId");
+      }
+
+      const url = await fileService.getDownloadUrl(fileId);
+      res.redirect(url);
     } catch (err) {
       next(err);
     }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { eventsApi } from "../api/events.api";
+import { filesApi } from "../api/files.api";
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
@@ -14,14 +15,29 @@ export default function CreateEventPage() {
   const [posterFileId, setPosterFileId] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingPoster, setIsUploadingPoster] = useState(false);
 
   const handlePosterChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // TODO: replace with real upload flow later
-    // for now, just store file name as placeholder or keep empty
-    setPosterFileId(file.name);
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      setError("Poster must be PNG or JPEG.");
+      return;
+    }
+
+    try {
+      setIsUploadingPoster(true);
+      setError("");
+
+      const presign = await filesApi.presignUpload(file.name, file.type, file.size);
+      await filesApi.uploadToPresignedUrl(presign.uploadUrl, file);
+      setPosterFileId(presign.fileId);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Failed to upload poster.");
+    } finally {
+      setIsUploadingPoster(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -60,9 +76,7 @@ export default function CreateEventPage() {
 
       navigate(`/events/${response.id}`);
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || "Failed to create event."
-      );
+      setError(err?.response?.data?.error || "Failed to create event.");
     } finally {
       setIsLoading(false);
     }
@@ -187,18 +201,21 @@ export default function CreateEventPage() {
               htmlFor="poster"
               className="mb-1 block text-sm font-medium text-gray-700"
             >
-              Poster Upload
+              Poster Upload (PNG/JPG)
             </label>
             <input
               id="poster"
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg"
               onChange={handlePosterChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
             />
+            {isUploadingPoster && (
+              <p className="mt-2 text-sm text-gray-500">Uploading poster...</p>
+            )}
             {posterFileId && (
               <p className="mt-2 text-sm text-gray-500">
-                Selected poster: {posterFileId}
+                Poster uploaded: <span className="font-mono">{posterFileId}</span>
               </p>
             )}
           </div>
@@ -207,10 +224,10 @@ export default function CreateEventPage() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isUploadingPoster}
             className="w-full rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isLoading ? "Creating..." : "Create Event"}
+            {isLoading ? "Creating..." : isUploadingPoster ? "Uploading poster..." : "Create Event"}
           </button>
         </form>
       </div>

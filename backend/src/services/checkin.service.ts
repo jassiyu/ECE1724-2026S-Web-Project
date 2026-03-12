@@ -1,5 +1,6 @@
 import { CheckIn, Ticket } from "@prisma/client";
 import { checkInClient } from "../clients/checkin.client";
+import { eventClient } from "../clients/event.client";
 import { eventStaffClient } from "../clients/eventStaff.client";
 import { ticketClient } from "../clients/ticket.client";
 import { emitCheckIn } from "../socket";
@@ -8,6 +9,7 @@ import {
   CheckInResult,
   CheckInDTO,
   TicketStatus as DomainTicketStatus,
+  UserRole,
 } from "../types";
 
 export interface ICheckInService {
@@ -16,7 +18,11 @@ export interface ICheckInService {
     qrToken: string,
     staffId: string
   ): Promise<CheckInResult>;
-  getRecentCheckIns(eventId: string, limit?: number): Promise<CheckInDTO[]>;
+  getRecentCheckIns(
+    eventId: string,
+    requester: { userId: string; role: UserRole },
+    limit?: number
+  ): Promise<CheckInDTO[]>;
 }
 
 function toCheckInDTO(checkIn: CheckIn): CheckInDTO {
@@ -48,39 +54,94 @@ function toTicketDTO(ticket: Ticket) {
 }
 
 export class CheckInService implements ICheckInService {
+  private async assertCheckInAccess(
+    eventId: string,
+    requester: { userId: string; role: UserRole }
+  ): Promise<void> {
+    const existingEvent = await eventClient.findById(eventId);
+    if (!existingEvent) {
+      throw AppError.notFound("Event not found");
+    }
+
+    if (requester.role === UserRole.ORGANIZER) {
+      if (existingEvent.organizerId !== requester.userId) {
+        throw AppError.forbidden("You do not own this event");
+      }
+      return;
+    }
+
+    if (requester.role === UserRole.STAFF) {
+      const assigned = await eventStaffClient.isStaffForEvent(eventId, requester.userId);
+      if (!assigned) {
+        throw AppError.forbidden("Staff is not assigned to this event");
+      }
+      return;
+    }
+
+    throw AppError.forbidden("You are not allowed to access check-ins");
+  }
+
+  private broadcast(eventId: string, payload: CheckInResult): void {
+    try {
+      emitCheckIn(eventId, payload);
+    } catch (error) {
+      console.warn("Check-in broadcast skipped:", error);
+    }
+  }
+
   async validateAndCheckIn(
     eventId: string,
     qrToken: string,
     staffId: string
   ): Promise<CheckInResult> {
+    const normalizedQrToken = qrToken?.trim();
+    if (!normalizedQrToken) {
+      throw AppError.badRequest("qrToken is required");
+    }
+
+    const existingEvent = await eventClient.findById(eventId);
+    if (!existingEvent) {
+      throw AppError.notFound("Event not found");
+    }
+
     const isAssignedStaff = await eventStaffClient.isStaffForEvent(eventId, staffId);
     if (!isAssignedStaff) {
       throw AppError.forbidden("Staff is not assigned to this event");
     }
 
-    const ticket = await ticketClient.findByQrToken(qrToken);
+    const ticket = await ticketClient.findByQrToken(normalizedQrToken);
     if (!ticket) {
-      return { status: "invalid_ticket" };
+      const result: CheckInResult = { status: "invalid_ticket" };
+      this.broadcast(eventId, result);
+      return result;
     }
 
     if (ticket.eventId !== eventId) {
-      return { status: "wrong_event" };
+      const result: CheckInResult = { status: "wrong_event" };
+      this.broadcast(eventId, result);
+      return result;
     }
 
     if (ticket.status === DomainTicketStatus.CANCELLED) {
-      return { status: "cancelled" };
+      const result: CheckInResult = { status: "cancelled" };
+      this.broadcast(eventId, result);
+      return result;
     }
 
     const existingCheckIn = await checkInClient.findByTicketId(ticket.id);
     if (existingCheckIn) {
-      return {
+      const result: CheckInResult = {
         status: "already_used",
         checkIn: toCheckInDTO(existingCheckIn),
       };
+      this.broadcast(eventId, result);
+      return result;
     }
 
     if (ticket.status === DomainTicketStatus.USED) {
-      return { status: "already_used" };
+      const result: CheckInResult = { status: "already_used" };
+      this.broadcast(eventId, result);
+      return result;
     }
 
     const checkIn = await checkInClient.create({
@@ -100,19 +161,17 @@ export class CheckInService implements ICheckInService {
       ticket: toTicketDTO(updatedTicket),
     };
 
-    try {
-      emitCheckIn(eventId, eventPayload);
-    } catch (error) {
-      console.warn("Check-in broadcast skipped:", error);
-    }
-
+    this.broadcast(eventId, eventPayload);
     return eventPayload;
   }
 
   async getRecentCheckIns(
     eventId: string,
+    requester: { userId: string; role: UserRole },
     limit = 20
   ): Promise<CheckInDTO[]> {
+    await this.assertCheckInAccess(eventId, requester);
+
     const checkIns = await checkInClient.findRecentByEvent(eventId, limit);
     return checkIns.map(toCheckInDTO);
   }

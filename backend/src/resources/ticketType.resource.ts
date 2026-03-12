@@ -1,19 +1,24 @@
 import { Router, Response, NextFunction } from "express";
-import { AuthenticatedRequest, UserRole } from "../types";
+import { AppError, AuthenticatedRequest, UserRole } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
 import { requireRole } from "../middleware/role.middleware";
+import { ticketTypeService } from "../services/ticketType.service";
 
 const router = Router({ mergeParams: true });
 
 // GET /events/:eventId/ticket-types (Public)
 router.get(
   "/",
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const types = await ticketTypeService.listByEvent(req.params.eventId);
-      // res.json(types);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const types = await ticketTypeService.listByEvent(eventId);
+      res.json(types);
     } catch (err) {
       next(err);
     }
@@ -25,12 +30,20 @@ router.post(
   "/",
   requireAuth,
   requireRole(UserRole.ORGANIZER),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const type = await ticketTypeService.create(req.params.eventId, req.user!.userId, req.body);
-      // res.status(201).json(type);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const type = await ticketTypeService.create(
+        eventId,
+        req.user!.userId,
+        req.body
+      );
+      res.status(201).json(type);
     } catch (err) {
       next(err);
     }

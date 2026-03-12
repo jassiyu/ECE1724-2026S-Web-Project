@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { eventsApi } from "../api/events.api";
+import { filesApi } from "../api/files.api";
 import { useAppSelector } from "../store/hooks";
 import type { EventDTO, TicketTypeDTO } from "../types";
 
@@ -74,11 +75,53 @@ export default function EventDetailPage() {
                 </p>
               </div>
 
+              {user?.role === "ORGANIZER" && (
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to={`/events/${event.id}/dashboard`}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                  >
+                    Live Dashboard
+                  </Link>
+                  <Link
+                    to={`/events/${event.id}/staff`}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                  >
+                    Manage Staff
+                  </Link>
+                  <Link
+                    to={`/events/${event.id}/edit`}
+                    className="rounded-lg bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
+                  >
+                    Edit Event
+                  </Link>
+                </div>
+              )}
+
+              {user?.role === "STAFF" && (
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to={`/scan/${event.id}`}
+                    className="inline-flex w-fit rounded-lg bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
+                  >
+                    Open Scanner
+                  </Link>
+                  <Link
+                    to={`/events/${event.id}/dashboard`}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                  >
+                    View Dashboard
+                  </Link>
+                </div>
+              )}
+
               {event.posterFileId && (
                 <div className="overflow-hidden rounded-2xl border border-gray-200">
-                  <div className="flex h-64 items-center justify-center bg-gray-100 text-gray-400">
-                    Poster preview placeholder
-                  </div>
+                  <img
+                    src={filesApi.getDownloadUrl(event.posterFileId)}
+                    alt={`${event.title} poster`}
+                    className="h-64 w-full object-cover"
+                  />
                 </div>
               )}
 

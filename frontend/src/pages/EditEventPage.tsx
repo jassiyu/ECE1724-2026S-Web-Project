@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { eventsApi } from "../api/events.api";
+import { filesApi } from "../api/files.api";
 
 export default function EditEventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -16,6 +17,7 @@ export default function EditEventPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPoster, setIsUploadingPoster] = useState(false);
   const [error, setError] = useState("");
 
   const toDateTimeLocal = (isoString: string) => {
@@ -48,9 +50,7 @@ export default function EditEventPage() {
         setCapacity(event.capacity != null ? String(event.capacity) : "");
         setPosterFileId(event.posterFileId ?? "");
       } catch (err: any) {
-        setError(
-          err?.response?.data?.message || "Failed to load event details."
-        );
+        setError(err?.response?.data?.error || "Failed to load event details.");
       } finally {
         setIsLoading(false);
       }
@@ -63,8 +63,23 @@ export default function EditEventPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // TODO: replace with real upload flow later
-    setPosterFileId(file.name);
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      setError("Poster must be PNG or JPEG.");
+      return;
+    }
+
+    try {
+      setIsUploadingPoster(true);
+      setError("");
+
+      const presign = await filesApi.presignUpload(file.name, file.type, file.size);
+      await filesApi.uploadToPresignedUrl(presign.uploadUrl, file);
+      setPosterFileId(presign.fileId);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Failed to upload poster.");
+    } finally {
+      setIsUploadingPoster(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -112,7 +127,7 @@ export default function EditEventPage() {
       await eventsApi.update(eventId, payload);
       navigate(`/events/${eventId}`);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to update event.");
+      setError(err?.response?.data?.error || "Failed to update event.");
     } finally {
       setIsSaving(false);
     }
@@ -247,19 +262,29 @@ export default function EditEventPage() {
               htmlFor="poster"
               className="mb-1 block text-sm font-medium text-gray-700"
             >
-              Poster Upload
+              Poster Upload (PNG/JPG)
             </label>
             <input
               id="poster"
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg"
               onChange={handlePosterChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
             />
+            {isUploadingPoster && (
+              <p className="mt-2 text-sm text-gray-500">Uploading poster...</p>
+            )}
             {posterFileId && (
-              <p className="mt-2 text-sm text-gray-500">
-                Current poster: {posterFileId}
-              </p>
+              <div className="mt-2 space-y-2">
+                <p className="text-sm text-gray-500">
+                  Current poster file: <span className="font-mono">{posterFileId}</span>
+                </p>
+                <img
+                  src={filesApi.getDownloadUrl(posterFileId)}
+                  alt="Event poster"
+                  className="h-40 rounded-lg border border-gray-200 object-cover"
+                />
+              </div>
             )}
           </div>
 
@@ -267,10 +292,10 @@ export default function EditEventPage() {
 
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || isUploadingPoster}
             className="w-full rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? "Saving..." : isUploadingPoster ? "Uploading poster..." : "Save Changes"}
           </button>
         </form>
       </div>

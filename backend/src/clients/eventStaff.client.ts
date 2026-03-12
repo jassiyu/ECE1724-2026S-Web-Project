@@ -1,7 +1,10 @@
-import { EventStaff } from "@prisma/client";
+import { EventStaff, User } from "@prisma/client";
+import prisma from "./prisma.client";
+
+export type EventStaffWithUser = EventStaff & { user: User };
 
 export interface IEventStaffClient {
-  findByEvent(eventId: string): Promise<EventStaff[]>;
+  findByEvent(eventId: string): Promise<EventStaffWithUser[]>;
   findByEventAndUser(
     eventId: string,
     userId: string
@@ -11,34 +14,38 @@ export interface IEventStaffClient {
   remove(eventId: string, userId: string): Promise<void>;
 }
 
-// TODO: Implement EventStaffClient using prisma
 export class EventStaffClient implements IEventStaffClient {
-  async findByEvent(_eventId: string): Promise<EventStaff[]> {
-    // TODO: prisma.eventStaff.findMany({ where: { eventId }, include: { user: true } })
-    throw new Error("Not implemented");
+  async findByEvent(eventId: string): Promise<EventStaffWithUser[]> {
+    return prisma.eventStaff.findMany({
+      where: { eventId },
+      include: { user: true },
+    });
   }
 
   async findByEventAndUser(
-    _eventId: string,
-    _userId: string
+    eventId: string,
+    userId: string
   ): Promise<EventStaff | null> {
-    // TODO: prisma.eventStaff.findUnique({ where: { eventId_userId: { eventId, userId } } })
-    throw new Error("Not implemented");
+    return prisma.eventStaff.findUnique({
+      where: { eventId_userId: { eventId, userId } },
+    });
   }
 
-  async isStaffForEvent(_eventId: string, _userId: string): Promise<boolean> {
-    // TODO: check if record exists
-    throw new Error("Not implemented");
+  async isStaffForEvent(eventId: string, userId: string): Promise<boolean> {
+    const assignment = await this.findByEventAndUser(eventId, userId);
+    return assignment !== null;
   }
 
-  async create(_eventId: string, _userId: string): Promise<EventStaff> {
-    // TODO: prisma.eventStaff.create({ data: { eventId, userId } })
-    throw new Error("Not implemented");
+  async create(eventId: string, userId: string): Promise<EventStaff> {
+    return prisma.eventStaff.create({
+      data: { eventId, userId },
+    });
   }
 
-  async remove(_eventId: string, _userId: string): Promise<void> {
-    // TODO: prisma.eventStaff.delete({ where: { eventId_userId: { eventId, userId } } })
-    throw new Error("Not implemented");
+  async remove(eventId: string, userId: string): Promise<void> {
+    await prisma.eventStaff.delete({
+      where: { eventId_userId: { eventId, userId } },
+    });
   }
 }
 

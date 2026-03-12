@@ -45,9 +45,18 @@ router.get(
       }
 
       const rawLimit = parseInt(req.query.limit as string, 10);
-      const limit = Number.isNaN(rawLimit) ? 20 : rawLimit;
+      const limit = Number.isNaN(rawLimit)
+        ? 20
+        : Math.min(100, Math.max(1, rawLimit));
 
-      const checkIns = await checkInService.getRecentCheckIns(eventId, limit);
+      const checkIns = await checkInService.getRecentCheckIns(
+        eventId,
+        {
+          userId: req.user!.userId,
+          role: req.user!.role,
+        },
+        limit
+      );
       res.json(checkIns);
     } catch (err) {
       next(err);

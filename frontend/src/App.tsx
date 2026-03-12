@@ -107,14 +107,18 @@ export default function App() {
 
         {/* Auth-only routes */}
         <Route element={<ProtectedRoute />}>
-          {/* Organizer */}
-          <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
-            <Route path="/events/new" element={<CreateEventPage />} />
-            <Route path="/events/:eventId/edit" element={<EditEventPage />} />
+          {/* Organizer + Staff */}
+          <Route element={<RoleGuard allowedRoles={["ORGANIZER", "STAFF"]} />}>
             <Route
               path="/events/:eventId/dashboard"
               element={<DashboardPage />}
             />
+          </Route>
+
+          {/* Organizer */}
+          <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
+            <Route path="/events/new" element={<CreateEventPage />} />
+            <Route path="/events/:eventId/edit" element={<EditEventPage />} />
             <Route
               path="/events/:eventId/staff"
               element={<StaffManagementPage />}

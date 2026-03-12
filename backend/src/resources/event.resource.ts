@@ -1,5 +1,5 @@
 import { Router, Response, NextFunction } from "express";
-import { AuthenticatedRequest, UserRole } from "../types";
+import { AppError, AuthenticatedRequest, UserRole } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
 import { requireRole } from "../middleware/role.middleware";
 import { eventService } from "../services/event.service";
@@ -78,7 +78,16 @@ router.get(
   requireRole(UserRole.ORGANIZER, UserRole.STAFF),
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const dashboard = await eventService.getDashboard(req.params.eventId as string);
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const dashboard = await eventService.getDashboard(eventId, {
+        userId: req.user!.userId,
+        role: req.user!.role,
+      });
       res.json(dashboard);
     } catch (err) {
       next(err);

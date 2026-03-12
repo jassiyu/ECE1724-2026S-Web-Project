@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { eventsApi } from "../api/events.api";
+import { filesApi } from "../api/files.api";
 import type { EventDTO } from "../types";
 
 export default function EventListPage() {
@@ -121,10 +122,22 @@ export default function EventListPage() {
             <Link
               key={event.id}
               to={`/events/${event.id}`}
-              className="block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+              className="block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
             >
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold">{event.title}</h2>
+              {event.posterFileId ? (
+                <img
+                  src={filesApi.getDownloadUrl(event.posterFileId)}
+                  alt={`${event.title} poster`}
+                  className="h-36 w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-36 items-center justify-center bg-gray-100 text-sm text-gray-400">
+                  No poster
+                </div>
+              )}
+
+              <div className="space-y-3 p-5">
+                <h2 className="text-lg font-semibold text-gray-900">{event.title}</h2>
 
                 <div className="space-y-1 text-sm text-gray-600">
                   <p>
