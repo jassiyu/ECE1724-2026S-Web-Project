@@ -6,6 +6,7 @@ import EventListPage from "./pages/EventListPage";
 import EventDetailPage from "./pages/EventDetailPage";
 import CreateEventPage from "./pages/CreateEventPage";
 import EditEventPage from "./pages/EditEventPage";
+import CreateTicketTypePage from "./pages/CreateTicketTypePage";
 import DashboardPage from "./pages/DashboardPage";
 import StaffManagementPage from "./pages/StaffManagementPage";
 import MyTicketsPage from "./pages/MyTicketsPage";
@@ -136,6 +137,10 @@ export default function App() {
           <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
             <Route path="/events/new" element={<CreateEventPage />} />
             <Route path="/events/:eventId/edit" element={<EditEventPage />} />
+            <Route
+              path="/events/:eventId/ticket-types/new"
+              element={<CreateTicketTypePage />}
+            />
             <Route
               path="/events/:eventId/staff"
               element={<StaffManagementPage />}

@@ -296,13 +296,27 @@ export default function EditEventPage() {
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={isSaving || isUploadingPoster}
-            className="w-full rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSaving ? "Saving..." : isUploadingPoster ? "Uploading poster..." : "Save Event Changes"}
-          </button>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              type="submit"
+              disabled={isSaving || isUploadingPoster}
+              className="rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSaving
+                ? "Saving..."
+                : isUploadingPoster
+                  ? "Uploading poster..."
+                  : "Save Event Changes"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/events/${eventId}`)}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
       <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -317,7 +331,7 @@ export default function EditEventPage() {
           {eventId && (
             <Link
               to={`/events/${eventId}/ticket-types/new`}
-              className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+              className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
             >
               Add Ticket Type
             </Link>
