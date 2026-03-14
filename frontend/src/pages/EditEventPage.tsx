@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link,useNavigate, useParams } from "react-router-dom";
 import { eventsApi } from "../api/events.api";
 import { filesApi } from "../api/files.api";
+import type { TicketTypeDTO } from "../types";
 
 export default function EditEventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -14,6 +15,7 @@ export default function EditEventPage() {
   const [endAt, setEndAt] = useState("");
   const [capacity, setCapacity] = useState("");
   const [posterFileId, setPosterFileId] = useState("");
+  const [ticketTypes, setTicketTypes] = useState<TicketTypeDTO[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,8 +41,11 @@ export default function EditEventPage() {
         setIsLoading(true);
         setError("");
 
-        const response = await eventsApi.get(eventId);
-        const event = response;
+        const [eventResponse, ticketTypesResponse] = await Promise.all([
+          eventsApi.get(eventId),
+          eventsApi.listTicketTypes(eventId),
+        ]);
+        const event = eventResponse;
 
         setTitle(event.title ?? "");
         setDescription(event.description ?? "");
@@ -49,6 +54,7 @@ export default function EditEventPage() {
         setEndAt(event.endAt ? toDateTimeLocal(event.endAt) : "");
         setCapacity(event.capacity != null ? String(event.capacity) : "");
         setPosterFileId(event.posterFileId ?? "");
+        setTicketTypes(ticketTypesResponse);
       } catch (err: any) {
         setError(err?.response?.data?.error || "Failed to load event details.");
       } finally {
@@ -295,9 +301,56 @@ export default function EditEventPage() {
             disabled={isSaving || isUploadingPoster}
             className="w-full rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSaving ? "Saving..." : isUploadingPoster ? "Uploading poster..." : "Save Changes"}
+            {isSaving ? "Saving..." : isUploadingPoster ? "Uploading poster..." : "Save Event Changes"}
           </button>
         </form>
+      </div>
+      <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Ticket Types</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage ticket types separately from the event details.
+            </p>
+          </div>
+
+          {eventId && (
+            <Link
+              to={`/events/${eventId}/ticket-types/new`}
+              className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+            >
+              Add Ticket Type
+            </Link>
+          )}
+        </div>
+
+        {ticketTypes.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500">
+            No ticket types yet.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {ticketTypes.map((tt) => (
+              <li
+                key={tt.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm"
+              >
+                <span className="font-medium text-gray-900">{tt.name}</span>
+                <span className="text-gray-600">
+                  ${(tt.priceCents / 100).toFixed(2)} · Qty {tt.quantity}
+                  {tt.soldCount != null && ` · Sold ${tt.soldCount}`}
+                </span>
+                {tt.salesStartAt != null && (
+                  <span className="text-gray-500">
+                    Sales: {new Date(tt.salesStartAt).toLocaleString()}
+                    {tt.salesEndAt != null &&
+                      ` – ${new Date(tt.salesEndAt).toLocaleString()}`}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
