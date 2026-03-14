@@ -1,4 +1,4 @@
-import { Link, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -6,12 +6,14 @@ import EventListPage from "./pages/EventListPage";
 import EventDetailPage from "./pages/EventDetailPage";
 import CreateEventPage from "./pages/CreateEventPage";
 import EditEventPage from "./pages/EditEventPage";
+import CreateTicketTypePage from "./pages/CreateTicketTypePage";
 import DashboardPage from "./pages/DashboardPage";
 import StaffManagementPage from "./pages/StaffManagementPage";
 import MyTicketsPage from "./pages/MyTicketsPage";
 import TicketDetailPage from "./pages/TicketDetailPage";
 import ScannerPage from "./pages/ScannerPage";
-import { useAppSelector } from "./store/hooks";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { clearCredentials } from "./store/slices/authSlice";
 import type { UserRole } from "./types";
 
 function ProtectedRoute() {
@@ -37,6 +39,13 @@ function RoleGuard({ allowedRoles }: { allowedRoles: UserRole[] }) {
 
 function AppLayout() {
   const auth = useAppSelector((s) => s.auth);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(clearCredentials());
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -68,9 +77,18 @@ function AppLayout() {
             )}
             <span className="mx-2 h-4 w-px bg-slate-300" />
             {auth.isAuthenticated && auth.user ? (
-              <span className="text-xs text-slate-600">
-                {auth.user.email} · {auth.user.role.toLowerCase()}
-              </span>
+              <div className="flex items-center gap-3 text-xs text-slate-600">
+                <span>
+                  {auth.user.email} · {auth.user.role.toLowerCase()}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="hover:underline"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <>
                 <Link to="/login" className="hover:underline">
@@ -119,6 +137,10 @@ export default function App() {
           <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
             <Route path="/events/new" element={<CreateEventPage />} />
             <Route path="/events/:eventId/edit" element={<EditEventPage />} />
+            <Route
+              path="/events/:eventId/ticket-types/new"
+              element={<CreateTicketTypePage />}
+            />
             <Route
               path="/events/:eventId/staff"
               element={<StaffManagementPage />}
