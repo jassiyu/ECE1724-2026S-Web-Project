@@ -62,4 +62,11 @@ export const eventsApi = {
       .post(`/events/${eventId}/ticket-types`, data)
       .then((r) => r.data);
   },
+
+  // ─── Tickets ─────────────────────────────────────────
+  claimTicket(eventId: string, ticketTypeId: string) {
+    return apiClient
+      .post(`/events/${eventId}/tickets`, { ticketTypeId })
+      .then((r) => r.data);
+  },
 };
