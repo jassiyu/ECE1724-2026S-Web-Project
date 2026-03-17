@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { checkinsApi } from "../api/checkins.api";
@@ -6,7 +6,6 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   clearScanResult,
   setScanResult,
-  startScanning,
 } from "../store/slices/scanSlice";
 import type { CheckInResult } from "../types";
 
@@ -51,21 +50,10 @@ function getResultView(result: CheckInResult) {
 export default function ScannerPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const dispatch = useAppDispatch();
-  const { lastResult, isScanning } = useAppSelector((state) => state.scan);
+  const { lastResult } = useAppSelector((state) => state.scan);
   const [tokenInput, setTokenInput] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!lastResult) return;
-
-    const timeoutId = window.setTimeout(() => {
-      dispatch(clearScanResult());
-    }, 3500);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [dispatch, lastResult]);
+  const [isScanning, setIsScanning] = useState(false);
 
   const handleValidate = async (rawToken: string) => {
     if (!eventId) {
@@ -80,7 +68,7 @@ export default function ScannerPage() {
     }
 
     setError(null);
-    dispatch(startScanning());
+    setIsScanning(true);
 
     try {
       const result = await checkinsApi.validate(eventId, qrToken);
@@ -91,6 +79,8 @@ export default function ScannerPage() {
         err instanceof Error ? err.message : "Validation request failed.";
       setError(message);
       dispatch(clearScanResult());
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -121,7 +111,12 @@ export default function ScannerPage() {
           <input
             id="qrToken"
             value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
+            onChange={(e) => {
+              if (lastResult) {
+                dispatch(clearScanResult());
+              }
+              setTokenInput(e.target.value);
+            }}
             placeholder="Paste or scan token here"
             className="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm outline-none ring-blue-500 focus:ring-2"
           />
