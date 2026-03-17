@@ -37,9 +37,9 @@ export const eventsApi = {
     return apiClient.get(`/events/${eventId}/staff`).then((r) => r.data);
   },
 
-  addStaff(eventId: string, userId: string): Promise<EventStaffDTO> {
+  addStaff(eventId: string, email: string): Promise<EventStaffDTO> {
     return apiClient
-      .post(`/events/${eventId}/staff`, { userId })
+      .post(`/events/${eventId}/staff`, { email })
       .then((r) => r.data);
   },
 
