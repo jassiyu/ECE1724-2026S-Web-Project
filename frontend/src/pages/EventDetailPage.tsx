@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { eventsApi } from "../api/events.api";
 import { filesApi } from "../api/files.api";
 import { useAppSelector } from "../store/hooks";
@@ -7,11 +7,14 @@ import type { EventDTO, TicketTypeDTO } from "../types";
 
 export default function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
 
   const [event, setEvent] = useState<EventDTO | null>(null);
   const [ticketTypes, setTicketTypes] = useState<TicketTypeDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isClaimingTicketId, setIsClaimingTicketId] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState("");
 
   const user = useAppSelector((state) => state.auth.user);
 
@@ -47,6 +50,27 @@ export default function EventDetailPage() {
   }, [eventId]);
 
   const isAttendee = user?.role === "ATTENDEE";
+
+  const handleClaimTicket = async (ticketTypeId: string) => {
+    if (!eventId) {
+      setClaimError("Event ID is missing.");
+      return;
+    }
+
+    try {
+      setIsClaimingTicketId(ticketTypeId);
+      setClaimError("");
+
+      await eventsApi.claimTicket(eventId, ticketTypeId);
+      navigate("/my-tickets");
+    } catch (err: any) {
+      setClaimError(
+        err?.response?.data?.error || "Failed to claim ticket."
+      );
+    } finally {
+      setIsClaimingTicketId(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
@@ -168,6 +192,11 @@ export default function EventDetailPage() {
               <p className="mt-1 text-sm text-gray-500">
                 View available tickets for this event
               </p>
+              {claimError && (
+                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                  {claimError}
+                </div>
+              )}
             </div>
 
             {ticketTypes.length === 0 ? (
@@ -208,9 +237,11 @@ export default function EventDetailPage() {
                     {isAttendee && (
                       <button
                         type="button"
-                        className="rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90"
+                        className="rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => handleClaimTicket(ticketType.id)}
+                        disabled={isClaimingTicketId === ticketType.id}
                       >
-                        Claim Ticket
+                        {isClaimingTicketId === ticketType.id ? "Claiming..." : "Claim Ticket"}
                       </button>
                     )}
                   </div>

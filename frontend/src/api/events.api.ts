@@ -37,9 +37,9 @@ export const eventsApi = {
     return apiClient.get(`/events/${eventId}/staff`).then((r) => r.data);
   },
 
-  addStaff(eventId: string, userId: string): Promise<EventStaffDTO> {
+  addStaff(eventId: string, email: string): Promise<EventStaffDTO> {
     return apiClient
-      .post(`/events/${eventId}/staff`, { userId })
+      .post(`/events/${eventId}/staff`, { email })
       .then((r) => r.data);
   },
 
@@ -60,6 +60,13 @@ export const eventsApi = {
   ): Promise<TicketTypeDTO> {
     return apiClient
       .post(`/events/${eventId}/ticket-types`, data)
+      .then((r) => r.data);
+  },
+
+  // ─── Tickets ─────────────────────────────────────────
+  claimTicket(eventId: string, ticketTypeId: string) {
+    return apiClient
+      .post(`/events/${eventId}/tickets`, { ticketTypeId })
       .then((r) => r.data);
   },
 };

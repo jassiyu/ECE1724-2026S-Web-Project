@@ -97,7 +97,7 @@ export interface EventFilters {
 // ─── DTOs: Event Staff ───────────────────────────────────
 
 export interface AddStaffInput {
-  userId: string;
+  email?: string;
 }
 
 export interface EventStaffDTO {

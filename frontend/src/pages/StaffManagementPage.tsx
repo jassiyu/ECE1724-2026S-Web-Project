@@ -11,7 +11,7 @@ export default function StaffManagementPage() {
   const { eventId } = useParams<{ eventId: string }>();
 
   const [staffList, setStaffList] = useState<EventStaffDTO[]>([]);
-  const [userIdInput, setUserIdInput] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
@@ -42,27 +42,27 @@ export default function StaffManagementPage() {
 
   const handleAddStaff = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const userId = userIdInput.trim();
+    const email = emailInput.trim().toLowerCase();
 
     if (!eventId) {
       setError("Event ID is missing.");
       return;
     }
 
-    if (!userId) {
-      setError("Enter a staff user ID.");
+    if (!email) {
+      setError("Enter a staff email.");
       return;
     }
 
     try {
       setIsAdding(true);
       setError("");
-      const assignment = await eventsApi.addStaff(eventId, userId);
+      const assignment = await eventsApi.addStaff(eventId, email);
       setStaffList((prev) => {
         const next = [assignment, ...prev.filter((item) => item.userId !== assignment.userId)];
         return next;
       });
-      setUserIdInput("");
+      setEmailInput("");
     } catch (err: any) {
       setError(extractApiError(err, "Failed to add staff."));
     } finally {
@@ -100,15 +100,15 @@ export default function StaffManagementPage() {
       <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900">Add Staff</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Enter a user ID for an account with the STAFF role.
+          Enter the email address of an account with the STAFF role.
         </p>
         <form onSubmit={handleAddStaff} className="mt-4 flex flex-col gap-3 md:flex-row">
           <input
             type="text"
-            value={userIdInput}
-            onChange={(e) => setUserIdInput(e.target.value)}
-            placeholder="Staff user ID"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm outline-none focus:border-black"
+            value={emailInput}
+            onChange={(e) => setEmailInput(e.target.value)}
+            placeholder="staff@example.com"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-black"
           />
           <button
             type="submit"

@@ -46,9 +46,9 @@ export class EventStaffService implements IEventStaffService {
     organizerId: string,
     input: AddStaffInput
   ): Promise<EventStaffDTO> {
-    const userId = input.userId?.trim();
-    if (!userId) {
-      throw AppError.badRequest("userId is required");
+    const email = input.email?.trim().toLowerCase();
+    if (!email) {
+      throw AppError.badRequest("email is required");
     }
 
     const event = await eventClient.findById(eventId);
@@ -60,7 +60,7 @@ export class EventStaffService implements IEventStaffService {
       throw AppError.forbidden("You do not own this event");
     }
 
-    const targetUser = await userClient.findById(userId);
+    const targetUser = await userClient.findByEmail(email);
     if (!targetUser) {
       throw AppError.notFound("Target user not found");
     }
@@ -69,7 +69,7 @@ export class EventStaffService implements IEventStaffService {
       throw AppError.badRequest("Target user must have STAFF role");
     }
 
-    const existing = await eventStaffClient.findByEventAndUser(eventId, userId);
+    const existing = await eventStaffClient.findByEventAndUser(eventId, targetUser.id);
     if (existing) {
       throw AppError.conflict(
         "User is already assigned to this event",
@@ -77,7 +77,7 @@ export class EventStaffService implements IEventStaffService {
       );
     }
 
-    const assignment = await eventStaffClient.create(eventId, userId);
+    const assignment = await eventStaffClient.create(eventId, targetUser.id);
     return {
       eventId: assignment.eventId,
       userId: assignment.userId,
