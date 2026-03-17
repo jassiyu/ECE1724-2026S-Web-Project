@@ -60,7 +60,7 @@ export default function TicketDetailPage() {
   }, [ticket]);
 
   return (
-    <div className="mx-auto max-w-md p-6">
+    <div className="mx-auto max-w-md p-6" data-demo="ticket-detail-page">
       <h1 className="text-2xl font-bold">Ticket</h1>
 
       {isLoading && <p className="mt-4 text-gray-500">Loading ticket...</p>}
@@ -91,13 +91,14 @@ export default function TicketDetailPage() {
             <img
               src={qrSrc}
               alt="Ticket QR code"
+              data-demo="ticket-qr-image"
               className="h-60 w-60 rounded border border-gray-200"
             />
           </div>
 
           <div className="rounded bg-gray-100 p-3 text-left">
             <p className="text-xs uppercase tracking-wide text-gray-500">QR Token</p>
-            <p className="break-all font-mono text-sm">{ticket.qrToken}</p>
+            <p className="break-all font-mono text-sm" data-demo="ticket-qr-token">{ticket.qrToken}</p>
           </div>
         </div>
       )}

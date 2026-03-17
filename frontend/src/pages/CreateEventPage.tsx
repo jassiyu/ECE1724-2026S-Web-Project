@@ -92,7 +92,7 @@ export default function CreateEventPage() {
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" data-demo="create-event-form">
           <div>
             <label
               htmlFor="title"
@@ -103,6 +103,7 @@ export default function CreateEventPage() {
             <input
               id="title"
               type="text"
+              data-demo="event-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter event title"
@@ -119,6 +120,7 @@ export default function CreateEventPage() {
             </label>
             <textarea
               id="description"
+              data-demo="event-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter event description"
@@ -137,6 +139,7 @@ export default function CreateEventPage() {
             <input
               id="venue"
               type="text"
+              data-demo="event-venue"
               value={venue}
               onChange={(e) => setVenue(e.target.value)}
               placeholder="Enter venue"
@@ -155,6 +158,7 @@ export default function CreateEventPage() {
               <input
                 id="startAt"
                 type="datetime-local"
+                data-demo="event-start"
                 value={startAt}
                 onChange={(e) => setStartAt(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
@@ -171,6 +175,7 @@ export default function CreateEventPage() {
               <input
                 id="endAt"
                 type="datetime-local"
+                data-demo="event-end"
                 value={endAt}
                 onChange={(e) => setEndAt(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
@@ -188,6 +193,7 @@ export default function CreateEventPage() {
             <input
               id="capacity"
               type="number"
+              data-demo="event-capacity"
               min="1"
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
@@ -224,6 +230,7 @@ export default function CreateEventPage() {
 
           <button
             type="submit"
+            data-demo="submit-create-event"
             disabled={isLoading || isUploadingPoster}
             className="w-full rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >

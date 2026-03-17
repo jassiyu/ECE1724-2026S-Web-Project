@@ -1,4 +1,5 @@
-import { Link, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -13,8 +14,34 @@ import MyTicketsPage from "./pages/MyTicketsPage";
 import TicketDetailPage from "./pages/TicketDetailPage";
 import ScannerPage from "./pages/ScannerPage";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
-import { clearCredentials } from "./store/slices/authSlice";
+import { clearCredentials, setCredentials } from "./store/slices/authSlice";
 import type { UserRole } from "./types";
+
+function DemoSessionBootstrap() {
+  const dispatch = useAppDispatch();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const demoToken = params.get("demoToken");
+    const demoUser = params.get("demoUser");
+
+    if (!demoToken || !demoUser) {
+      return;
+    }
+
+    try {
+      const normalized = demoUser.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+      const user = JSON.parse(window.atob(padded));
+      dispatch(setCredentials({ token: demoToken, user }));
+    } catch (error) {
+      console.error("Failed to bootstrap demo session", error);
+    }
+  }, [dispatch, location.search]);
+
+  return null;
+}
 
 function ProtectedRoute() {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
@@ -111,63 +138,66 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public auth pages (no layout to keep them minimal) */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+    <>
+      <DemoSessionBootstrap />
+      <Routes>
+        {/* Public auth pages (no layout to keep them minimal) */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-      {/* App shell with navbar + protected content */}
-      <Route element={<AppLayout />}>
-        {/* Public within shell */}
-        <Route path="/" element={<EventListPage />} />
-        <Route path="/events" element={<EventListPage />} />
-        <Route path="/events/:eventId" element={<EventDetailPage />} />
+        {/* App shell with navbar + protected content */}
+        <Route element={<AppLayout />}>
+          {/* Public within shell */}
+          <Route path="/" element={<EventListPage />} />
+          <Route path="/events" element={<EventListPage />} />
+          <Route path="/events/:eventId" element={<EventDetailPage />} />
 
-        {/* Auth-only routes */}
-        <Route element={<ProtectedRoute />}>
-          {/* Organizer + Staff */}
-          <Route element={<RoleGuard allowedRoles={["ORGANIZER", "STAFF"]} />}>
-            <Route
-              path="/events/:eventId/dashboard"
-              element={<DashboardPage />}
-            />
-          </Route>
+          {/* Auth-only routes */}
+          <Route element={<ProtectedRoute />}>
+            {/* Organizer + Staff */}
+            <Route element={<RoleGuard allowedRoles={["ORGANIZER", "STAFF"]} />}>
+              <Route
+                path="/events/:eventId/dashboard"
+                element={<DashboardPage />}
+              />
+            </Route>
 
-          {/* Organizer */}
-          <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
-            <Route path="/events/new" element={<CreateEventPage />} />
-            <Route path="/events/:eventId/edit" element={<EditEventPage />} />
-            <Route
-              path="/events/:eventId/ticket-types/new"
-              element={<CreateTicketTypePage />}
-            />
-            <Route
-              path="/events/:eventId/staff"
-              element={<StaffManagementPage />}
-            />
-          </Route>
+            {/* Organizer */}
+            <Route element={<RoleGuard allowedRoles={["ORGANIZER"]} />}>
+              <Route path="/events/new" element={<CreateEventPage />} />
+              <Route path="/events/:eventId/edit" element={<EditEventPage />} />
+              <Route
+                path="/events/:eventId/ticket-types/new"
+                element={<CreateTicketTypePage />}
+              />
+              <Route
+                path="/events/:eventId/staff"
+                element={<StaffManagementPage />}
+              />
+            </Route>
 
-          {/* Attendee */}
-          <Route element={<RoleGuard allowedRoles={["ATTENDEE"]} />}>
-            <Route path="/my-tickets" element={<MyTicketsPage />} />
-            <Route
-              path="/my-tickets/:ticketId"
-              element={<TicketDetailPage />}
-            />
-          </Route>
+            {/* Attendee */}
+            <Route element={<RoleGuard allowedRoles={["ATTENDEE"]} />}>
+              <Route path="/my-tickets" element={<MyTicketsPage />} />
+              <Route
+                path="/my-tickets/:ticketId"
+                element={<TicketDetailPage />}
+              />
+            </Route>
 
-          {/* Staff */}
-          <Route element={<RoleGuard allowedRoles={["STAFF"]} />}>
-            <Route path="/scan/:eventId" element={<ScannerPage />} />
+            {/* Staff */}
+            <Route element={<RoleGuard allowedRoles={["STAFF"]} />}>
+              <Route path="/scan/:eventId" element={<ScannerPage />} />
+            </Route>
           </Route>
         </Route>
-      </Route>
 
-      {/* Fallback */}
-      <Route
-        path="*"
-        element={<div className="p-8 text-center">404 — Page not found</div>}
-      />
-    </Routes>
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={<div className="p-8 text-center">404 — Page not found</div>}
+        />
+      </Routes>
+    </>
   );
 }

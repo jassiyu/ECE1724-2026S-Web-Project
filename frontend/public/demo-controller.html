@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Controller</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      :root {
+        color-scheme: light;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .stage-shell {
+        position: relative;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .stage {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #fff;
+      }
+
+      .stage.hidden {
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .stage.preloaded {
+        position: fixed;
+        width: 1px;
+        height: 1px;
+        right: -10px;
+        bottom: -10px;
+        opacity: 0;
+      }
+
+      .debug {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage-shell">
+      <iframe id="primaryStage" class="stage" title="Primary stage"></iframe>
+      <iframe id="dashboardStage" class="stage hidden preloaded" title="Dashboard stage"></iframe>
+    </main>
+    <div class="debug" aria-hidden="true">
+      <h1 id="demoTitle">Loading demo...</h1>
+      <p id="demoSubtitle">Waiting for manifest</p>
+      <div id="countdown">3</div>
+      <p id="clockStatus">Preparing demo</p>
+      <p id="segmentTitle">Waiting...</p>
+      <p id="segmentWindow"></p>
+      <ul id="sayList"></ul>
+      <ul id="actionList"></ul>
+      <div id="timeline"></div>
+      <div id="log"></div>
+      <strong id="activeView">Organizer</strong>
+      <strong id="elapsed">0:00</strong>
+    </div>
+
+    <script>
+      const demoTitle = document.getElementById("demoTitle");
+      const demoSubtitle = document.getElementById("demoSubtitle");
+      const countdownNode = document.getElementById("countdown");
+      const clockStatus = document.getElementById("clockStatus");
+      const segmentTitle = document.getElementById("segmentTitle");
+      const segmentWindow = document.getElementById("segmentWindow");
+      const sayList = document.getElementById("sayList");
+      const actionList = document.getElementById("actionList");
+      const timeline = document.getElementById("timeline");
+      const logNode = document.getElementById("log");
+      const primaryStage = document.getElementById("primaryStage");
+      const dashboardStage = document.getElementById("dashboardStage");
+      const activeView = document.getElementById("activeView");
+      const elapsedNode = document.getElementById("elapsed");
+
+      const state = {
+        manifest: null,
+        startTime: 0,
+        eventId: "",
+        ticketId: "",
+        qrToken: "",
+        activeSegment: -1,
+      };
+
+      function log(message) {
+        const stamp = new Date().toLocaleTimeString();
+        logNode.textContent += `[${stamp}] ${message}\n`;
+        logNode.scrollTop = logNode.scrollHeight;
+        console.log(message);
+      }
+
+      function formatMmSs(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      function encodeUser(user) {
+        return btoa(JSON.stringify(user))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/g, "");
+      }
+
+      function buildDemoUrl(path, auth) {
+        const url = new URL(path, window.location.origin);
+        url.searchParams.set("demoToken", auth.token);
+        url.searchParams.set("demoUser", encodeUser(auth.user));
+        return url.toString();
+      }
+
+      function setList(node, items) {
+        node.replaceChildren(
+          ...(items || []).map((item) => {
+            const li = document.createElement("li");
+            li.textContent = item;
+            return li;
+          })
+        );
+      }
+
+      function renderTimeline(segments) {
+        timeline.replaceChildren(
+          ...segments.map((segment, index) => {
+            const item = document.createElement("div");
+            item.className = "timeline-item";
+            item.dataset.index = String(index);
+            item.innerHTML = `
+              <div style="font-weight: 700;">${segment.title}</div>
+              <div style="color: var(--muted); margin-top: 4px;">${formatMmSs(segment.start)}-${formatMmSs(segment.end)}</div>
+            `;
+            return item;
+          })
+        );
+      }
+
+      function setActiveSegment(index) {
+        state.activeSegment = index;
+        Array.from(timeline.children).forEach((child, childIndex) => {
+          child.classList.toggle("active", childIndex === index);
+        });
+      }
+
+      function primeSegmentUi(segment, index) {
+        setActiveSegment(index);
+        segmentTitle.textContent = segment.title;
+        segmentWindow.textContent = `${formatMmSs(segment.start)}-${formatMmSs(segment.end)}`;
+        setList(sayList, segment.say);
+        setList(actionList, segment.actions);
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+      }
+
+      async function fetchManifest() {
+        const res = await fetch(`/demo-manifest.json?ts=${Date.now()}`);
+        if (!res.ok) {
+          throw new Error(`Manifest request failed: ${res.status}`);
+        }
+        return res.json();
+      }
+
+      async function fetchApiJson(path, auth) {
+        const res = await fetch(path, {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        });
+
+        const text = await res.text();
+        let data = {};
+
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+        }
+
+        if (!res.ok) {
+          const message =
+            typeof data === "object" && data && "error" in data ? data.error : `${res.status}`;
+          throw new Error(`API request failed for ${path}: ${message}`);
+        }
+
+        return data;
+      }
+
+      async function waitFor(condition, timeoutMs, label) {
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          const value = await condition();
+          if (value) {
+            return value;
+          }
+          await sleep(150);
+        }
+        throw new Error(`Timed out waiting for ${label}`);
+      }
+
+      async function waitForFrameReady(frame, selector, timeoutMs = 15000) {
+        await waitFor(() => {
+          try {
+            const doc = frame.contentDocument;
+            if (!doc || doc.readyState !== "complete") {
+              return null;
+            }
+            return selector ? doc.querySelector(selector) : doc;
+          } catch {
+            return null;
+          }
+        }, timeoutMs, selector || "frame document");
+      }
+
+      function dispatchMouseClick(element) {
+        const view = element.ownerDocument.defaultView;
+        const pointerEvent = typeof PointerEvent === "function" ? PointerEvent : MouseEvent;
+        const pointerEvents = ["pointerdown", "pointerup"];
+        const mouseEvents = ["mousedown", "mouseup"];
+
+        for (const type of pointerEvents) {
+          element.dispatchEvent(
+            new pointerEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              view,
+            })
+          );
+        }
+
+        for (const type of mouseEvents) {
+          element.dispatchEvent(
+            new MouseEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              view,
+            })
+          );
+        }
+      }
+
+      function clickElement(element) {
+        if (!element) {
+          throw new Error("Missing clickable element");
+        }
+
+        element.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
+        element.focus();
+        dispatchMouseClick(element);
+        element.click();
+      }
+
+      function setNativeValue(element, value) {
+        const view = element.ownerDocument.defaultView;
+        const tagName = element.tagName.toLowerCase();
+        const prototype =
+          tagName === "textarea"
+            ? view.HTMLTextAreaElement.prototype
+            : view.HTMLInputElement.prototype;
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+
+        if (!descriptor || !descriptor.set) {
+          element.value = value;
+          return;
+        }
+
+        descriptor.set.call(element, value);
+      }
+
+      function fireInputSequence(element) {
+        element.dispatchEvent(new Event("input", { bubbles: true }));
+        element.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      async function clearInput(element) {
+        element.focus();
+        setNativeValue(element, "");
+        fireInputSequence(element);
+        await sleep(60);
+      }
+
+      async function typeIntoInput(element, value, options = {}) {
+        const { charDelay = 20, clearFirst = true } = options;
+
+        if (!element) {
+          throw new Error("Missing input element");
+        }
+
+        element.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
+        clickElement(element);
+
+        if (clearFirst) {
+          await clearInput(element);
+        }
+
+        for (const char of value) {
+          const nextValue = `${element.value}${char}`;
+          setNativeValue(element, nextValue);
+          element.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: char }));
+          element.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, key: char }));
+          fireInputSequence(element);
+          element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, key: char }));
+          await sleep(charDelay);
+        }
+
+        element.blur();
+      }
+
+      async function setInputValue(element, value) {
+        if (!element) {
+          throw new Error("Missing input element");
+        }
+
+        const tagName = element.tagName.toLowerCase();
+        const inputType = tagName === "input" ? (element.getAttribute("type") || "text").toLowerCase() : tagName;
+
+        if (tagName === "textarea") {
+          clickElement(element);
+          await clearInput(element);
+          setNativeValue(element, value);
+          fireInputSequence(element);
+          element.blur();
+          await sleep(120);
+          return;
+        }
+
+        if (inputType === "datetime-local" || inputType === "number") {
+          clickElement(element);
+          await clearInput(element);
+          setNativeValue(element, value);
+          fireInputSequence(element);
+          element.blur();
+          await sleep(120);
+          return;
+        }
+
+        await typeIntoInput(element, value);
+      }
+
+      async function waitForInputValue(doc, selector, expected, timeoutMs = 4000) {
+        await waitFor(() => {
+          const element = doc.querySelector(selector);
+          if (!element) return null;
+          return element.value === expected ? element : null;
+        }, timeoutMs, `${selector} to equal ${expected}`);
+      }
+
+      async function fillInput(doc, selector, value) {
+        const element = doc.querySelector(selector);
+        await setInputValue(element, value);
+        await waitForInputValue(doc, selector, value);
+      }
+
+      async function setScannerToken(doc, value) {
+        const element = doc.querySelector('[data-demo="scanner-token-input"]');
+        if (!element) {
+          throw new Error("Missing scanner token input");
+        }
+
+        clickElement(element);
+        await clearInput(element);
+        setNativeValue(element, value);
+        fireInputSequence(element);
+        await waitForInputValue(doc, '[data-demo="scanner-token-input"]', value, 4000);
+      }
+
+      function findVisibleError(doc) {
+        const candidates = Array.from(
+          doc.querySelectorAll(".text-red-500, .text-red-600, .text-red-700, [role='alert']")
+        );
+
+        for (const node of candidates) {
+          const text = (node.textContent || "").trim();
+          if (text) {
+            return text;
+          }
+        }
+
+        return "";
+      }
+
+      function extractEventIdFromFrame(frame) {
+        const path = frame.contentWindow.location.pathname;
+        const match = path.match(/^\/events\/([^/]+)/);
+        return match ? match[1] : "";
+      }
+
+      async function navigateStage(frame, viewLabel, src, readySelector, timeoutMs = 15000) {
+        activeView.textContent = viewLabel;
+        frame.src = src;
+        await waitForFrameReady(frame, readySelector, timeoutMs);
+        return frame.contentDocument;
+      }
+
+      function showPrimary() {
+        primaryStage.classList.remove("hidden");
+        dashboardStage.classList.add("hidden");
+        dashboardStage.classList.add("preloaded");
+      }
+
+      function showDashboard() {
+        primaryStage.classList.add("hidden");
+        dashboardStage.classList.remove("hidden");
+        dashboardStage.classList.remove("preloaded");
+      }
+
+      async function runOrganizerHome(manifest) {
+        showPrimary();
+        await navigateStage(
+          primaryStage,
+          "Organizer",
+          buildDemoUrl("/events", manifest.auth.organizer),
+          '[data-demo="event-list-page"]'
+        );
+        log("Organizer event list loaded.");
+      }
+
+      async function runCreateEvent(manifest) {
+        showPrimary();
+        const doc = await navigateStage(
+          primaryStage,
+          "Organizer",
+          buildDemoUrl("/events/new", manifest.auth.organizer),
+          '[data-demo="create-event-form"]'
+        );
+
+        const values = manifest.demoValues;
+        await fillInput(doc, '[data-demo="event-title"]', values.eventTitle);
+        await fillInput(doc, '[data-demo="event-description"]', values.eventDescription);
+        await fillInput(doc, '[data-demo="event-venue"]', values.eventVenue);
+        await fillInput(doc, '[data-demo="event-start"]', values.eventStartAt);
+        await fillInput(doc, '[data-demo="event-end"]', values.eventEndAt);
+        await fillInput(doc, '[data-demo="event-capacity"]', values.eventCapacity);
+
+        await sleep(1200);
+        clickElement(doc.querySelector('[data-demo="submit-create-event"]'));
+
+        const createResult = await waitFor(() => {
+          try {
+            const nextDoc = primaryStage.contentDocument;
+            const isDetail = nextDoc && nextDoc.querySelector('[data-demo="event-detail-page"]');
+            if (isDetail) {
+              const eventId = extractEventIdFromFrame(primaryStage);
+              return eventId ? { ok: true, eventId } : null;
+            }
+
+            const error = findVisibleError(nextDoc);
+            return error ? { ok: false, error } : null;
+          } catch {
+            return null;
+          }
+        }, 20000, "event detail navigation");
+
+        if (!createResult.ok) {
+          throw new Error(`Create Event failed: ${createResult.error}`);
+        }
+
+        state.eventId = createResult.eventId;
+        log(`Event created: ${state.eventId}`);
+      }
+
+      async function runCreateTicketType(manifest) {
+        showPrimary();
+        const doc = await navigateStage(
+          primaryStage,
+          "Organizer",
+          buildDemoUrl(`/events/${state.eventId}/ticket-types/new`, manifest.auth.organizer),
+          '[data-demo="create-ticket-type-form"]'
+        );
+
+        const values = manifest.demoValues;
+        await fillInput(doc, '[data-demo="ticket-type-name"]', values.ticketName);
+        await fillInput(doc, '[data-demo="ticket-type-price"]', values.ticketPrice);
+        await fillInput(doc, '[data-demo="ticket-type-quantity"]', values.ticketQuantity);
+
+        await sleep(1000);
+        clickElement(doc.querySelector('[data-demo="submit-ticket-type"]'));
+
+        const ticketTypeResult = await waitFor(() => {
+          try {
+            const nextDoc = primaryStage.contentDocument;
+            const detailPage = nextDoc?.querySelector('[data-demo="event-detail-page"]');
+            if (detailPage) {
+              return { ok: true };
+            }
+
+            const error = findVisibleError(nextDoc);
+            return error ? { ok: false, error } : null;
+          } catch {
+            return null;
+          }
+        }, 20000, "ticket type creation redirect");
+
+        if (!ticketTypeResult.ok) {
+          throw new Error(`Add Ticket Type failed: ${ticketTypeResult.error}`);
+        }
+
+        log("Ticket type created.");
+      }
+
+      async function runAssignStaff(manifest) {
+        showPrimary();
+        const doc = await navigateStage(
+          primaryStage,
+          "Organizer",
+          buildDemoUrl(`/events/${state.eventId}/staff`, manifest.auth.organizer),
+          '[data-demo="staff-assignment-form"]'
+        );
+
+        const email = manifest.auth.staff.user.email;
+        await fillInput(doc, '[data-demo="staff-email-input"]', email);
+        await sleep(1000);
+        clickElement(doc.querySelector('[data-demo="add-staff-button"]'));
+
+        const assignmentResult = await waitFor(() => {
+          try {
+            const nextDoc = primaryStage.contentDocument;
+            const assigned = nextDoc?.querySelector(`[data-demo="assigned-staff:${email}"]`);
+            if (assigned) {
+              return { ok: true };
+            }
+
+            const error = findVisibleError(nextDoc);
+            return error ? { ok: false, error } : null;
+          } catch {
+            return null;
+          }
+        }, 20000, "staff assignment");
+
+        if (!assignmentResult.ok) {
+          throw new Error(`Assign Staff failed: ${assignmentResult.error}`);
+        }
+
+        log(`Assigned staff: ${email}`);
+
+        dashboardStage.src = buildDemoUrl(`/events/${state.eventId}/dashboard`, manifest.auth.organizer);
+        await waitForFrameReady(dashboardStage, '[data-demo="dashboard-page"]', 20000);
+        log("Organizer dashboard opened in background for live updates.");
+      }
+
+      async function runClaimTicket(manifest) {
+        showPrimary();
+        const eventDoc = await navigateStage(
+          primaryStage,
+          "Attendee",
+          buildDemoUrl(`/events/${state.eventId}`, manifest.auth.attendee),
+          '[data-demo="event-detail-page"]'
+        );
+
+        const claimButton = await waitFor(() => {
+          try {
+            return primaryStage.contentDocument?.querySelector('[data-demo^="claim-ticket:"]');
+          } catch {
+            return null;
+          }
+        }, 15000, "claim ticket button");
+
+        await sleep(10000);
+        clickElement(claimButton);
+
+        const claimResult = await waitFor(() => {
+          try {
+            const nextDoc = primaryStage.contentDocument;
+            const ticketsPage = nextDoc?.querySelector('[data-demo="my-tickets-page"]');
+            if (ticketsPage) {
+              return { ok: true };
+            }
+
+            const error = findVisibleError(nextDoc);
+            return error ? { ok: false, error } : null;
+          } catch {
+            return null;
+          }
+        }, 20000, "my tickets page");
+
+        if (!claimResult.ok) {
+          throw new Error(`Claim Ticket failed: ${claimResult.error}`);
+        }
+
+        const ticketLink = await waitFor(() => {
+          try {
+            return primaryStage.contentDocument?.querySelector('[data-demo^="my-ticket:"]');
+          } catch {
+            return null;
+          }
+        }, 15000, "claimed ticket link");
+
+        const href = ticketLink.getAttribute("href") || "";
+        state.ticketId = href.split("/").pop() || "";
+
+        await sleep(1200);
+        clickElement(ticketLink);
+
+        await waitFor(() => {
+          try {
+            return primaryStage.contentDocument?.querySelector('[data-demo="ticket-detail-page"]');
+          } catch {
+            return null;
+          }
+        }, 20000, "ticket detail page");
+
+        const ticket = await fetchApiJson(`/api/tickets/${state.ticketId}`, manifest.auth.attendee);
+        state.qrToken = (ticket.qrToken || "").trim();
+        if (!state.qrToken) {
+          throw new Error("Ticket QR token is missing after claim");
+        }
+        log(`Ticket claimed: ${state.ticketId}`);
+      }
+
+      async function submitScan(expectTitle) {
+        const doc = primaryStage.contentDocument;
+        if (!state.qrToken) {
+          throw new Error("Scanner cannot run because qrToken is empty");
+        }
+
+        await setScannerToken(doc, state.qrToken);
+        await sleep(700);
+        clickElement(doc.querySelector('[data-demo="scanner-submit"]'));
+
+        const scanResult = await waitFor(() => {
+          try {
+            const titleNode = primaryStage.contentDocument?.querySelector('[data-demo="scanner-result-title"]');
+            if (titleNode) {
+              const title = titleNode.textContent.trim();
+              if (title === expectTitle) {
+                return { ok: true };
+              }
+              return { ok: false, error: `Unexpected scan result: ${title}` };
+            }
+
+            const error = primaryStage.contentDocument?.querySelector(".text-red-600");
+            const errorText = error?.textContent?.trim();
+            return errorText ? { ok: false, error: errorText } : null;
+          } catch {
+            return null;
+          }
+        }, 20000, `scanner result ${expectTitle}`);
+
+        if (!scanResult.ok) {
+          throw new Error(scanResult.error);
+        }
+      }
+
+      async function runScanSuccess(manifest) {
+        showPrimary();
+        await navigateStage(
+          primaryStage,
+          "Staff",
+          buildDemoUrl(`/scan/${state.eventId}`, manifest.auth.staff),
+          '[data-demo="scanner-page"]'
+        );
+
+        await submitScan("VALID");
+        log("First scan returned VALID.");
+      }
+
+      async function runScanDuplicate() {
+        showPrimary();
+        await sleep(700);
+        await submitScan("ALREADY USED");
+        log("Second scan returned ALREADY USED.");
+      }
+
+      function readDashboardState(doc) {
+        if (!doc) {
+          return null;
+        }
+
+        const countNode = doc.querySelector('[data-demo="dashboard-checked-in-count"]');
+        const feedNode = doc.querySelector('[data-demo="dashboard-recent-feed"]');
+        if (!countNode || !feedNode) {
+          return null;
+        }
+
+        const count = Number((countNode.textContent || "").trim());
+        const feedText = feedNode.textContent || "";
+        const hasUsedSignal = /VALID|checked in|ALREADY USED|Duplicate/i.test(feedText);
+
+        return {
+          count,
+          hasUsedSignal,
+        };
+      }
+
+      async function runDashboard(manifest) {
+        activeView.textContent = "Organizer Dashboard";
+        const dashboardUrl = buildDemoUrl(`/events/${state.eventId}/dashboard`, manifest.auth.organizer);
+
+        if (!dashboardStage.src) {
+          dashboardStage.src = dashboardUrl;
+          await waitForFrameReady(dashboardStage, '[data-demo="dashboard-page"]', 20000);
+        }
+
+        let shouldUseBackgroundDashboard = false;
+
+        try {
+          await waitFor(() => {
+            try {
+              const state = readDashboardState(dashboardStage.contentDocument);
+              if (!state) {
+                return null;
+              }
+              return state.count >= 1 && state.hasUsedSignal ? state : null;
+            } catch {
+              return null;
+            }
+          }, 6000, "dashboard realtime updates");
+
+          shouldUseBackgroundDashboard = true;
+        } catch (error) {
+          log(`Dashboard realtime frame fallback: ${error.message}`);
+        }
+
+        if (shouldUseBackgroundDashboard) {
+          showDashboard();
+          log("Dashboard shows live checked-in count and recent feed.");
+          return;
+        }
+
+        showPrimary();
+        await navigateStage(
+          primaryStage,
+          "Organizer Dashboard",
+          dashboardUrl,
+          '[data-demo="dashboard-page"]',
+          20000
+        );
+
+        await waitFor(() => {
+          try {
+            const state = readDashboardState(primaryStage.contentDocument);
+            if (!state) {
+              return null;
+            }
+            return state.count >= 1 && state.hasUsedSignal ? state : null;
+          } catch {
+            return null;
+          }
+        }, 10000, "dashboard data after fallback navigation");
+
+        log("Dashboard opened with checked-in count and recent feed.");
+      }
+
+      async function runSegment(segment, manifest) {
+        switch (segment.kind) {
+          case "organizer-home":
+            return runOrganizerHome(manifest);
+          case "create-event":
+            return runCreateEvent(manifest);
+          case "create-ticket-type":
+            return runCreateTicketType(manifest);
+          case "assign-staff":
+            return runAssignStaff(manifest);
+          case "claim-ticket":
+            return runClaimTicket(manifest);
+          case "scan-success":
+            return runScanSuccess(manifest);
+          case "scan-duplicate":
+            return runScanDuplicate();
+          case "dashboard":
+            return runDashboard(manifest);
+          default:
+            throw new Error(`Unsupported segment kind: ${segment.kind}`);
+        }
+      }
+
+      async function waitUntilDemoSecond(second) {
+        const now = performance.now();
+        const target = state.startTime + second * 1000;
+        if (target > now) {
+          await sleep(target - now);
+        }
+      }
+
+      function startClock(durationSeconds) {
+        const timerId = window.setInterval(() => {
+          if (!state.startTime) {
+            return;
+          }
+
+          const elapsedSeconds = Math.max(0, Math.floor((performance.now() - state.startTime) / 1000));
+          elapsedNode.textContent = formatMmSs(elapsedSeconds);
+
+          if (elapsedSeconds >= durationSeconds) {
+            window.clearInterval(timerId);
+            clockStatus.textContent = "Demo complete";
+          }
+        }, 250);
+      }
+
+      async function runDemo() {
+        const manifest = await fetchManifest();
+        state.manifest = manifest;
+        demoTitle.textContent = manifest.title;
+        demoSubtitle.textContent = `${manifest.durationSeconds / 60} minute autoplay run`;
+        renderTimeline(manifest.segments);
+
+        for (let value = manifest.countdownSeconds; value >= 1; value -= 1) {
+          countdownNode.textContent = String(value);
+          clockStatus.textContent = "Starting soon";
+          await sleep(1000);
+        }
+
+        countdownNode.textContent = "LIVE";
+        clockStatus.textContent = "Autoplay running";
+        state.startTime = performance.now();
+        startClock(manifest.durationSeconds);
+
+        for (let index = 0; index < manifest.segments.length; index += 1) {
+          const segment = manifest.segments[index];
+          await waitUntilDemoSecond(segment.start);
+          primeSegmentUi(segment, index);
+          log(`Starting segment: ${segment.title}`);
+          await runSegment(segment, manifest);
+        }
+
+        await waitUntilDemoSecond(manifest.durationSeconds);
+        log("Demo finished.");
+        clockStatus.textContent = "Demo complete";
+      }
+
+      runDemo().catch((error) => {
+        console.error(error);
+        countdownNode.textContent = "ERR";
+        clockStatus.textContent = "Automation failed";
+        log(`ERROR: ${error.message}`);
+      });
+    </script>
+  </body>
+</html>

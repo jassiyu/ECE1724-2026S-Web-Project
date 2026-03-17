@@ -125,7 +125,7 @@ export default function CreateTicketTypePage() {
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" data-demo="create-ticket-type-form">
           <div>
             <label
               htmlFor="name"
@@ -136,6 +136,7 @@ export default function CreateTicketTypePage() {
             <input
               id="name"
               type="text"
+              data-demo="ticket-type-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. General Admission"
@@ -154,6 +155,7 @@ export default function CreateTicketTypePage() {
               <input
                 id="price"
                 type="number"
+                data-demo="ticket-type-price"
                 min="0"
                 step="0.01"
                 value={price}
@@ -173,6 +175,7 @@ export default function CreateTicketTypePage() {
               <input
                 id="quantity"
                 type="number"
+                data-demo="ticket-type-quantity"
                 min="1"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
@@ -193,6 +196,7 @@ export default function CreateTicketTypePage() {
               <input
                 id="salesStartAt"
                 type="datetime-local"
+                data-demo="ticket-type-sales-start"
                 value={salesStartAt}
                 onChange={(e) => setSalesStartAt(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
@@ -209,6 +213,7 @@ export default function CreateTicketTypePage() {
               <input
                 id="salesEndAt"
                 type="datetime-local"
+                data-demo="ticket-type-sales-end"
                 value={salesEndAt}
                 onChange={(e) => setSalesEndAt(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
@@ -224,6 +229,7 @@ export default function CreateTicketTypePage() {
           <div className="flex items-center gap-3">
             <button
               type="submit"
+              data-demo="submit-ticket-type"
               disabled={isSaving}
               className="rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >

@@ -1,0 +1,196 @@
+{
+  "title": "3-Minute UI Autoplay Demo",
+  "countdownSeconds": 3,
+  "durationSeconds": 180,
+  "auth": {
+    "organizer": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlOTFhODU4Zi01NjYzLTQyMWUtODM0Mi0zZWFiZWFkNWIwZmIiLCJlbWFpbCI6ImRlbW8ub3JnYW5pemVyLjE3NzM3MzMwNzBAY2FtcHVzLmxvY2FsIiwicm9sZSI6Ik9SR0FOSVpFUiIsImlhdCI6MTc3MzczMzA3MCwiZXhwIjoxNzc0MzM3ODcwfQ.0uOnJBlIvhPWL1c8PiUv-iLOPC-WtmdP56DIaX1D-mQ",
+      "user": {
+        "id": "e91a858f-5663-421e-8342-3eabead5b0fb",
+        "email": "demo.organizer.1773733070@campus.local",
+        "role": "ORGANIZER",
+        "createdAt": "2026-03-17T07:37:50.394Z"
+      }
+    },
+    "staff": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYzgxOTZmNi1kODA3LTQwNGYtYjI1Mi02MjlkMWNmODhhMGQiLCJlbWFpbCI6ImRlbW8uc3RhZmYuMTc3MzczMzA3MEBjYW1wdXMubG9jYWwiLCJyb2xlIjoiU1RBRkYiLCJpYXQiOjE3NzM3MzMwNzAsImV4cCI6MTc3NDMzNzg3MH0.p5ai55dSXIhE9wflEt7UysnKrrsHDtckgSIHCSft11Q",
+      "user": {
+        "id": "1c8196f6-d807-404f-b252-629d1cf88a0d",
+        "email": "demo.staff.1773733070@campus.local",
+        "role": "STAFF",
+        "createdAt": "2026-03-17T07:37:50.467Z"
+      }
+    },
+    "attendee": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MTczMWJiNy1mMjcyLTQ5ZTItOTY3Ny0yMjIyZTVlZTQ2YzYiLCJlbWFpbCI6ImRlbW8uYXR0ZW5kZWUuMTc3MzczMzA3MEBjYW1wdXMubG9jYWwiLCJyb2xlIjoiQVRURU5ERUUiLCJpYXQiOjE3NzM3MzMwNzAsImV4cCI6MTc3NDMzNzg3MH0.64-aAJks9lg8Yi1AVyGG50gxjsN9PlsCvpKlqaUAK8g",
+      "user": {
+        "id": "71731bb7-f272-49e2-9677-2222e5ee46c6",
+        "email": "demo.attendee.1773733070@campus.local",
+        "role": "ATTENDEE",
+        "createdAt": "2026-03-17T07:37:50.538Z"
+      }
+    }
+  },
+  "staffEmail": "demo.staff.1773733070@campus.local",
+  "demoValues": {
+    "eventTitle": "Automated Demo Event 1773733070",
+    "eventDescription": "An event created automatically through the UI for the presentation walkthrough.",
+    "eventVenue": "Hart House Great Hall",
+    "eventStartAt": "2026-03-24T05:37",
+    "eventEndAt": "2026-03-24T07:37",
+    "eventCapacity": "120",
+    "ticketName": "General Admission",
+    "ticketPrice": "0",
+    "ticketQuantity": "120"
+  },
+  "segments": [
+    {
+      "start": 0,
+      "end": 20,
+      "title": "Organizer Event Management",
+      "kind": "organizer-home",
+      "actions": [
+        "Show the organizer event list and navigation.",
+        "Point out that organizer-only options are available."
+      ],
+      "say": [
+        "We start on the organizer side, already authenticated as an organizer.",
+        "From here, the organizer can manage events and move into the event creation flow."
+      ],
+      "proofs": [
+        "Organizer flow",
+        "Protected organizer routes"
+      ]
+    },
+    {
+      "start": 20,
+      "end": 50,
+      "title": "Create Event",
+      "kind": "create-event",
+      "actions": [
+        "Open the Create Event page.",
+        "Auto-fill the form and submit it through the real UI."
+      ],
+      "say": [
+        "Now the organizer creates a new event through the UI.",
+        "The form submission creates a real event record in the backend database."
+      ],
+      "proofs": [
+        "Frontend form handling",
+        "Backend event creation",
+        "Database persistence"
+      ]
+    },
+    {
+      "start": 50,
+      "end": 75,
+      "title": "Add Ticket Type",
+      "kind": "create-ticket-type",
+      "actions": [
+        "Open the ticket type form for the newly created event.",
+        "Auto-fill the ticket type and submit it."
+      ],
+      "say": [
+        "Next, the organizer creates a ticket type for this event.",
+        "That makes the event claimable for attendees."
+      ],
+      "proofs": [
+        "Ticket type creation",
+        "Database write"
+      ]
+    },
+    {
+      "start": 75,
+      "end": 95,
+      "title": "Assign Staff",
+      "kind": "assign-staff",
+      "actions": [
+        "Open the staff assignment page.",
+        "Auto-add the demo staff account to the event by email."
+      ],
+      "say": [
+        "Now the organizer assigns a staff member to the event.",
+        "In the current version, staff assignment uses the staff account email instead of the user ID.",
+        "Only assigned staff should be able to validate tickets for that event."
+      ],
+      "proofs": [
+        "Role-based workflow",
+        "Organizer-only management"
+      ]
+    },
+    {
+      "start": 95,
+      "end": 120,
+      "title": "Attendee Claim Ticket",
+      "kind": "claim-ticket",
+      "actions": [
+        "Open the event detail page as an attendee.",
+        "Use the real Claim Ticket button and navigate to the ticket detail page."
+      ],
+      "say": [
+        "On the attendee side, the ticket is claimed through the event page.",
+        "The attendee receives a unique QR token for check-in."
+      ],
+      "proofs": [
+        "Attendee experience",
+        "Ticket issuance"
+      ]
+    },
+    {
+      "start": 120,
+      "end": 145,
+      "title": "Staff Scan Success",
+      "kind": "scan-success",
+      "actions": [
+        "Open the scanner as the assigned staff user.",
+        "Auto-submit the claimed QR token and show the VALID result."
+      ],
+      "say": [
+        "Now staff validate the ticket.",
+        "The backend checks that the ticket belongs to the event and has not already been used, then it records the check-in."
+      ],
+      "proofs": [
+        "Validation logic",
+        "Check-in persistence",
+        "Frontend-backend integration"
+      ]
+    },
+    {
+      "start": 145,
+      "end": 152,
+      "title": "Duplicate Scan Prevention",
+      "kind": "scan-duplicate",
+      "actions": [
+        "Scan the same QR token again.",
+        "Show the ALREADY USED result."
+      ],
+      "say": [
+        "If the same ticket is scanned again, duplicate prevention is triggered immediately."
+      ],
+      "proofs": [
+        "Duplicate prevention"
+      ]
+    },
+    {
+      "start": 152,
+      "end": 180,
+      "title": "Organizer Dashboard Live Update",
+      "kind": "dashboard",
+      "frame": "dashboard",
+      "actions": [
+        "Return to the organizer dashboard that has been open in the background.",
+        "Point out the updated checked-in count and recent activity feed."
+      ],
+      "say": [
+        "Back on the organizer dashboard, the checked-in count and recent activity update without refreshing.",
+        "This demonstrates our real-time functionality using Socket.IO.",
+        "In one workflow, we demonstrated organizer management, attendee ticketing, staff validation, database persistence, and live dashboard updates."
+      ],
+      "proofs": [
+        "Real-time dashboard",
+        "Recent check-ins",
+        "Strong closing"
+      ]
+    }
+  ]
+}

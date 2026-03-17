@@ -97,7 +97,7 @@ export default function StaffManagementPage() {
         </p>
       </div>
 
-      <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" data-demo="staff-assignment-form">
         <h2 className="text-lg font-semibold text-gray-900">Add Staff</h2>
         <p className="mt-1 text-sm text-gray-500">
           Enter the email address of an account with the STAFF role.
@@ -105,6 +105,7 @@ export default function StaffManagementPage() {
         <form onSubmit={handleAddStaff} className="mt-4 flex flex-col gap-3 md:flex-row">
           <input
             type="text"
+            data-demo="staff-email-input"
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
             placeholder="staff@example.com"
@@ -112,6 +113,7 @@ export default function StaffManagementPage() {
           />
           <button
             type="submit"
+            data-demo="add-staff-button"
             disabled={isAdding}
             className="rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -141,6 +143,7 @@ export default function StaffManagementPage() {
             {staffList.map((assignment) => (
               <div
                 key={`${assignment.eventId}:${assignment.userId}`}
+                data-demo={`assigned-staff:${assignment.user.email}`}
                 className="flex flex-col gap-3 rounded-xl border border-gray-200 p-4 md:flex-row md:items-center md:justify-between"
               >
                 <div>

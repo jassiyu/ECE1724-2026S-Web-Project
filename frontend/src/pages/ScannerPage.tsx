@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { checkinsApi } from "../api/checkins.api";
@@ -55,18 +55,6 @@ export default function ScannerPage() {
   const [tokenInput, setTokenInput] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!lastResult) return;
-
-    const timeoutId = window.setTimeout(() => {
-      dispatch(clearScanResult());
-    }, 3500);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [dispatch, lastResult]);
-
   const handleValidate = async (rawToken: string) => {
     if (!eventId) {
       setError("Missing event ID in route.");
@@ -102,7 +90,7 @@ export default function ScannerPage() {
   const resultView = lastResult ? getResultView(lastResult) : null;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center p-4">
+    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center p-4" data-demo="scanner-page">
       <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold">Scan Ticket</h1>
         <p className="mt-1 text-sm text-gray-600">
@@ -120,13 +108,20 @@ export default function ScannerPage() {
           </label>
           <input
             id="qrToken"
+            data-demo="scanner-token-input"
             value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
+            onChange={(e) => {
+              if (lastResult) {
+                dispatch(clearScanResult());
+              }
+              setTokenInput(e.target.value);
+            }}
             placeholder="Paste or scan token here"
             className="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm outline-none ring-blue-500 focus:ring-2"
           />
           <button
             type="submit"
+            data-demo="scanner-submit"
             disabled={isScanning}
             className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-blue-300"
           >
@@ -137,8 +132,8 @@ export default function ScannerPage() {
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
         {resultView && (
-          <div className={`mt-5 rounded-lg border p-4 ${resultView.classes}`}>
-            <p className="text-2xl font-extrabold">{resultView.title}</p>
+          <div className={`mt-5 rounded-lg border p-4 ${resultView.classes}`} data-demo="scanner-result">
+            <p className="text-2xl font-extrabold" data-demo="scanner-result-title">{resultView.title}</p>
             <p className="mt-1 text-sm">{resultView.subtitle}</p>
           </div>
         )}

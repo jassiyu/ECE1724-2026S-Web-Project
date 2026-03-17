@@ -73,7 +73,7 @@ export default function EventDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-6 py-10" data-demo="event-detail-page">
       {isLoading && (
         <div className="rounded-2xl border border-gray-200 bg-white p-6 text-gray-500">
           Loading event details...
@@ -103,12 +103,14 @@ export default function EventDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     to={`/events/${event.id}/dashboard`}
+                    data-demo="open-live-dashboard"
                     className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                   >
                     Live Dashboard
                   </Link>
                   <Link
                     to={`/events/${event.id}/staff`}
+                    data-demo="open-manage-staff"
                     className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                   >
                     Manage Staff
@@ -126,6 +128,7 @@ export default function EventDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     to={`/scan/${event.id}`}
+                    data-demo="open-scanner"
                     className="inline-flex w-fit rounded-lg bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
                   >
                     Open Scanner
@@ -237,6 +240,7 @@ export default function EventDetailPage() {
                     {isAttendee && (
                       <button
                         type="button"
+                        data-demo={`claim-ticket:${ticketType.id}`}
                         className="rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => handleClaimTicket(ticketType.id)}
                         disabled={isClaimingTicketId === ticketType.id}

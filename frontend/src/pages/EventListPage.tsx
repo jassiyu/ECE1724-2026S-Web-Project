@@ -53,7 +53,7 @@ export default function EventListPage() {
   }, [events, search, venueFilter]);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10">
+    <div className="mx-auto max-w-7xl px-6 py-10" data-demo="event-list-page">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">Events</h1>
         <p className="text-sm text-gray-500">
@@ -69,10 +69,11 @@ export default function EventListPage() {
           >
             Search
           </label>
-          <input
-            id="search"
-            type="text"
-            value={search}
+            <input
+              id="search"
+              type="text"
+              data-demo="event-search"
+              value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by title or description"
             className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
@@ -86,9 +87,10 @@ export default function EventListPage() {
           >
             Venue
           </label>
-          <select
-            id="venueFilter"
-            value={venueFilter}
+            <select
+              id="venueFilter"
+              data-demo="event-venue-filter"
+              value={venueFilter}
             onChange={(e) => setVenueFilter(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
           >
@@ -122,6 +124,7 @@ export default function EventListPage() {
             <Link
               key={event.id}
               to={`/events/${event.id}`}
+              data-demo={`event-card:${event.id}`}
               className="block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
             >
               {event.posterFileId ? (
