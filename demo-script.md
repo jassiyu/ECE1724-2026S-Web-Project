@@ -49,6 +49,6 @@ We start on the organizer side, already authenticated and looking at the event m
 
 ### `2:27-3:00`
 
-"Finally, we return to the organizer dashboard. The checked-in count and recent scan feed reflect the check-in flow we just performed. This is also where our real-time functionality appears, the dashboard updates through Socket.IO instead of relying on a manual refresh."
+"Finally, we are back to the organizer dashboard. The checked-in count and recent scan feed reflect the check-in flow we just performed. This is also where our real-time functionality appears, the dashboard updates through Socket.IO instead of relying on a manual refresh."
 
 "Finally, we return to the organizer dashboard. The checked-in count and recent scan feed update without a page refresh, which is our real-time functionality using Socket.IO."
