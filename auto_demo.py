@@ -223,12 +223,12 @@ def create_demo_data() -> dict:
             "createEventFilledPauseMs": 14000,
             "createEventDetailPauseMs": 5000,
             "createTicketTypeDetailPauseMs": 0,
-            "attendeeEventDetailPauseMs": 2000,
+            "attendeeEventDetailPauseMs": 15000,
             "ticketName": "General Admission",
             "ticketPrice": "0",
             "ticketQuantity": "120",
             "createTicketTypeFilledPauseMs": 6000,
-            "myTicketsPagePauseMs": 8200,
+            "myTicketsPagePauseMs": 3200,
             "scannerFilledPauseMs": 3000,
         },
     }
@@ -347,7 +347,7 @@ def build_manifest(data: dict) -> dict:
             },
             {
                 "start": 70,
-                "end": 91,
+                "end": 97,
                 "title": "Attendee Claim Ticket",
                 "kind": "claim-ticket",
                 "actions": [
@@ -364,8 +364,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 91,
-                "end": 111,
+                "start": 97,
+                "end": 119,
                 "title": "Staff Scan Success",
                 "kind": "scan-success",
                 "actions": [
@@ -383,8 +383,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 111,
-                "end": 120,
+                "start": 119,
+                "end": 128,
                 "title": "Duplicate Scan Prevention",
                 "kind": "scan-duplicate",
                 "actions": [
@@ -399,7 +399,7 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 120,
+                "start": 128,
                 "end": 180,
                 "title": "Organizer Dashboard Live Update",
                 "kind": "dashboard",

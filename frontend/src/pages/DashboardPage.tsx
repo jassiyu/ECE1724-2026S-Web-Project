@@ -248,7 +248,10 @@ export default function DashboardPage() {
           <section className="grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <p className="text-sm text-gray-500">Checked In</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900" data-demo="dashboard-checked-in-count">
+              <p
+                className="mt-2 text-3xl font-bold text-gray-900"
+                data-demo="dashboard-checked-in-count"
+              >
                 {dashboard.checkedInCount}
               </p>
             </div>
@@ -264,7 +267,10 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" data-demo="dashboard-recent-feed">
+          <section
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+            data-demo="dashboard-occupancy"
+          >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-medium text-gray-700">Occupancy</p>
               <p className="text-sm text-gray-500">{occupancyPercent}%</p>
@@ -277,7 +283,10 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <section
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+            data-demo="dashboard-recent-feed"
+          >
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Recent Scan Feed</h2>
               <p className="text-sm text-gray-500">

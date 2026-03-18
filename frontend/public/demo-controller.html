@@ -710,11 +710,13 @@
 
         const count = Number((countNode.textContent || "").trim());
         const feedText = feedNode.textContent || "";
-        const hasUsedSignal = /VALID|checked in|ALREADY USED|Duplicate/i.test(feedText);
+        const hasSuccessSignal = /VALID|checked in/i.test(feedText);
+        const hasAlertSignal = /ALREADY USED|Duplicate|INVALID|WRONG EVENT|wrong event|CANCELLED|Cancelled/i.test(feedText);
 
         return {
           count,
-          hasUsedSignal,
+          hasSuccessSignal,
+          hasAlertSignal,
         };
       }
 
@@ -727,54 +729,20 @@
           await waitForFrameReady(dashboardStage, '[data-demo="dashboard-page"]', 20000);
         }
 
-        let shouldUseBackgroundDashboard = false;
-
-        try {
-          await waitFor(() => {
-            try {
-              const state = readDashboardState(dashboardStage.contentDocument);
-              if (!state) {
-                return null;
-              }
-              return state.count >= 1 && state.hasUsedSignal ? state : null;
-            } catch {
-              return null;
-            }
-          }, 6000, "dashboard realtime updates");
-
-          shouldUseBackgroundDashboard = true;
-        } catch (error) {
-          log(`Dashboard realtime frame fallback: ${error.message}`);
-        }
-
-        if (shouldUseBackgroundDashboard) {
-          showDashboard();
-          log("Dashboard shows live checked-in count and recent feed.");
-          return;
-        }
-
-        showPrimary();
-        await navigateStage(
-          primaryStage,
-          "Organizer Dashboard",
-          dashboardUrl,
-          '[data-demo="dashboard-page"]',
-          20000
-        );
-
         await waitFor(() => {
           try {
-            const state = readDashboardState(primaryStage.contentDocument);
+            const state = readDashboardState(dashboardStage.contentDocument);
             if (!state) {
               return null;
             }
-            return state.count >= 1 && state.hasUsedSignal ? state : null;
+            return state.count >= 1 && state.hasSuccessSignal && state.hasAlertSignal ? state : null;
           } catch {
             return null;
           }
-        }, 10000, "dashboard data after fallback navigation");
+        }, 12000, "dashboard realtime updates");
 
-        log("Dashboard opened with checked-in count and recent feed.");
+        showDashboard();
+        log("Dashboard shows live checked-in count and realtime alert feed.");
       }
 
       async function runSegment(segment, manifest) {
