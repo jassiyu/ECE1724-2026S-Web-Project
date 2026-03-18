@@ -41,7 +41,7 @@ We start on the organizer side, already authenticated and looking at the event m
 
 ### `1:55-2:20`
 
-"Now we switch to staff account and open the scanner. When the QR token is submitted, the backend checks that the ticket exists, belongs to this event, and has not already been used. If everything is valid, system records a check-in and the staff interface returns VALID."
+"Now we switch to staff account and open the scanner. When the QR token is submitted, the backend checks if the ticket exists, belongs to this event, and has not already been used. If everything is valid, system records this check-in and staff's screen will show VALID ."
 
 ### `2:20-2:27`
 
