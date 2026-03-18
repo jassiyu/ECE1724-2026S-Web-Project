@@ -41,14 +41,14 @@ We start on the organizer side, already authenticated and looking at the event m
 
 ### `1:55-2:20`
 
-"Now we switch to staff account and open the scanner. When the QR token is submitted, the backend checks that the ticket exists, belongs to this event, and has not already been used. If everything is valid, the backend records a check-in and the staff interface returns VALID."
+"Now we switch to staff account and open the scanner. When the QR token is submitted, the backend checks that the ticket exists, belongs to this event, and has not already been used. If everything is valid, system records a check-in and the staff interface returns VALID."
 
 ### `2:20-2:27`
 
-"If the same ticket is scanned a second time, duplicate prevention triggers immediately and the result becomes ALREADY USED. This is the backend logic that prevents the same ticket from being reused at the door."
+"If the same ticket is scanned a second time, duplicate prevention triggers immediately and the result becomes ALREADY USED. Just wait a few seconds switch back to the organizer's account."
 
 ### `2:27-3:00`
 
-"Finally, we return to the organizer dashboard. The checked-in count and recent scan feed reflect the check-in flow we just performed, which gives the organizer live operational visibility during an event. This is also where our real-time functionality appears, because the dashboard updates through Socket.IO instead of relying on a manual refresh."
+"Finally, we return to the organizer dashboard. The checked-in count and recent scan feed reflect the check-in flow we just performed. This is also where our real-time functionality appears, the dashboard updates through Socket.IO instead of relying on a manual refresh."
 
-"Finally, we return to the organizer dashboard. The checked-in count and recent scan feed update without a page refresh, which demonstrates our real-time functionality using Socket.IO."
+"Finally, we return to the organizer dashboard. The checked-in count and recent scan feed update without a page refresh, which is our real-time functionality using Socket.IO."
