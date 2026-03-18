@@ -220,9 +220,16 @@ def create_demo_data() -> dict:
             "eventStartAt": start_at.strftime("%Y-%m-%dT%H:%M"),
             "eventEndAt": end_at.strftime("%Y-%m-%dT%H:%M"),
             "eventCapacity": "120",
+            "createEventFilledPauseMs": 18000,
+            "createEventDetailPauseMs": 5000,
+            "createTicketTypeDetailPauseMs": 3000,
+            "attendeeEventDetailPauseMs": 2000,
             "ticketName": "General Admission",
             "ticketPrice": "0",
             "ticketQuantity": "120",
+            "createTicketTypeFilledPauseMs": 6000,
+            "myTicketsPagePauseMs": 11200,
+            "scannerFilledPauseMs": 3000,
         },
     }
 
@@ -284,7 +291,7 @@ def build_manifest(data: dict) -> dict:
             },
             {
                 "start": 20,
-                "end": 50,
+                "end": 44,
                 "title": "Create Event",
                 "kind": "create-event",
                 "actions": [
@@ -302,7 +309,7 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 50,
+                "start": 44,
                 "end": 75,
                 "title": "Add Ticket Type",
                 "kind": "create-ticket-type",
@@ -321,7 +328,7 @@ def build_manifest(data: dict) -> dict:
             },
             {
                 "start": 75,
-                "end": 95,
+                "end": 92,
                 "title": "Assign Staff",
                 "kind": "assign-staff",
                 "actions": [
@@ -339,7 +346,7 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 95,
+                "start": 92,
                 "end": 120,
                 "title": "Attendee Claim Ticket",
                 "kind": "claim-ticket",
@@ -358,7 +365,7 @@ def build_manifest(data: dict) -> dict:
             },
             {
                 "start": 120,
-                "end": 145,
+                "end": 140,
                 "title": "Staff Scan Success",
                 "kind": "scan-success",
                 "actions": [
@@ -376,7 +383,7 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 145,
+                "start": 140,
                 "end": 152,
                 "title": "Duplicate Scan Prevention",
                 "kind": "scan-duplicate",

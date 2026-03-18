@@ -457,7 +457,8 @@
         await fillInput(doc, '[data-demo="event-end"]', values.eventEndAt);
         await fillInput(doc, '[data-demo="event-capacity"]', values.eventCapacity);
 
-        await sleep(1200);
+        const createEventFilledPauseMs = manifest.demoValues.createEventFilledPauseMs || 18000;
+        await sleep(createEventFilledPauseMs);
         clickElement(doc.querySelector('[data-demo="submit-create-event"]'));
 
         const createResult = await waitFor(() => {
@@ -482,6 +483,9 @@
 
         state.eventId = createResult.eventId;
         log(`Event created: ${state.eventId}`);
+
+        const createEventDetailPauseMs = manifest.demoValues.createEventDetailPauseMs || 5000;
+        await sleep(createEventDetailPauseMs);
       }
 
       async function runCreateTicketType(manifest) {
@@ -498,7 +502,8 @@
         await fillInput(doc, '[data-demo="ticket-type-price"]', values.ticketPrice);
         await fillInput(doc, '[data-demo="ticket-type-quantity"]', values.ticketQuantity);
 
-        await sleep(1000);
+        const createTicketTypeFilledPauseMs = manifest.demoValues.createTicketTypeFilledPauseMs || 3000;
+        await sleep(createTicketTypeFilledPauseMs);
         clickElement(doc.querySelector('[data-demo="submit-ticket-type"]'));
 
         const ticketTypeResult = await waitFor(() => {
@@ -519,6 +524,9 @@
         if (!ticketTypeResult.ok) {
           throw new Error(`Add Ticket Type failed: ${ticketTypeResult.error}`);
         }
+
+        const createTicketTypeDetailPauseMs = manifest.demoValues.createTicketTypeDetailPauseMs || 3000;
+        await sleep(createTicketTypeDetailPauseMs);
 
         log("Ticket type created.");
       }
@@ -580,7 +588,8 @@
           }
         }, 15000, "claim ticket button");
 
-        await sleep(10000);
+        const attendeeEventDetailPauseMs = manifest.demoValues.attendeeEventDetailPauseMs || 2000;
+        await sleep(attendeeEventDetailPauseMs);
         clickElement(claimButton);
 
         const claimResult = await waitFor(() => {
@@ -613,7 +622,8 @@
         const href = ticketLink.getAttribute("href") || "";
         state.ticketId = href.split("/").pop() || "";
 
-        await sleep(1200);
+        const myTicketsPagePauseMs = manifest.demoValues.myTicketsPagePauseMs || 11200;
+        await sleep(myTicketsPagePauseMs);
         clickElement(ticketLink);
 
         await waitFor(() => {
@@ -639,7 +649,8 @@
         }
 
         await setScannerToken(doc, state.qrToken);
-        await sleep(700);
+        const scannerFilledPauseMs = state.manifest?.demoValues?.scannerFilledPauseMs || 3000;
+        await sleep(scannerFilledPauseMs);
         clickElement(doc.querySelector('[data-demo="scanner-submit"]'));
 
         const scanResult = await waitFor(() => {

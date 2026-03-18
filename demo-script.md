@@ -19,15 +19,17 @@ This script is for the **demo only**. It matches the current automated demo flow
 
 ### `0:00-0:10`
 
-"We’ll use one end-to-end workflow to show the system in action. We start on the organizer side, already authenticated and looking at the event management page. This immediately shows our role-based access control, because organizer-only actions are available here and these routes are also protected on the backend."
+"We’ll use one end-to-end workflow to show the system in action. 
+
+We start on the organizer side, already authenticated and looking at the event management page. This immediately shows our role-based access control, because organizer-only actions are available here and these routes are also protected on the backend."
 
 ### `0:10-0:45`
 
-"Now the organizer creates a new event through the real form in the React frontend. When we submit, that request goes to our Express backend, Prisma validates and persists the event in PostgreSQL, and the UI navigates to the newly created event. This is one clear example of frontend-backend integration plus relational database persistence."
+"Now the organizer creates a new event through the real form in the React frontend. When we submit, that request goes to our Express backend, Prisma validates and persists the event in PostgreSQL, and the UI navigates to the newly created event."
 
 ### `0:45-1:10`
 
-"Next, the organizer adds a ticket type. This is another real database-backed action, and it turns the event from just a record into something attendees can actually claim. At this point, the event is configured for the rest of the workflow."
+"Next, the organizer adds a ticket type. This is another real database-backed action, and it turns the event from just a record into something attendees can actually claim."
 
 ### `1:10-1:30`
 
@@ -35,7 +37,9 @@ This script is for the **demo only**. It matches the current automated demo flow
 
 ### `1:30-1:55`
 
-"Switching to the attendee view, we open the event detail page and use the real Claim Ticket button. The system issues a ticket for this attendee and takes us to the ticket detail page, where we can see the ticket itself and the QR token that will be used for check-in."
+"Switching to the attendee view, we open the event detail page and use the real Claim Ticket button. The system issues a ticket for this attendee 
+
+and takes us to the ticket detail page, where we can see the ticket itself and the QR token that will be used for check-in."
 
 ### `1:55-2:20`
 
@@ -48,3 +52,5 @@ This script is for the **demo only**. It matches the current automated demo flow
 ### `2:27-3:00`
 
 "Finally, we return to the organizer dashboard. The checked-in count and recent scan feed reflect the check-in flow we just performed, which gives the organizer live operational visibility during an event. This is also where our real-time functionality appears, because the dashboard updates through Socket.IO instead of relying on a manual refresh."
+
+"Finally, we return to the organizer dashboard. The checked-in count and recent scan feed update without a page refresh, which demonstrates our real-time functionality using Socket.IO."

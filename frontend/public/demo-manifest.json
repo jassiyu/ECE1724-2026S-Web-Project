@@ -4,44 +4,51 @@
   "durationSeconds": 180,
   "auth": {
     "organizer": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlOTFhODU4Zi01NjYzLTQyMWUtODM0Mi0zZWFiZWFkNWIwZmIiLCJlbWFpbCI6ImRlbW8ub3JnYW5pemVyLjE3NzM3MzMwNzBAY2FtcHVzLmxvY2FsIiwicm9sZSI6Ik9SR0FOSVpFUiIsImlhdCI6MTc3MzczMzA3MCwiZXhwIjoxNzc0MzM3ODcwfQ.0uOnJBlIvhPWL1c8PiUv-iLOPC-WtmdP56DIaX1D-mQ",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmE0ODI3Ni0wYmViLTQwOGItYjNkMC01MmI1NmYwOGMzMjAiLCJlbWFpbCI6ImRlbW8ub3JnYW5pemVyLjE3NzM4MDYzMzZAY2FtcHVzLmxvY2FsIiwicm9sZSI6Ik9SR0FOSVpFUiIsImlhdCI6MTc3MzgwNjMzNiwiZXhwIjoxNzc0NDExMTM2fQ.UbemIt5WEz5ll7sJ01SBCOpgBLnGxB1feytcY4llOKY",
       "user": {
-        "id": "e91a858f-5663-421e-8342-3eabead5b0fb",
-        "email": "demo.organizer.1773733070@campus.local",
+        "id": "1ba48276-0beb-408b-b3d0-52b56f08c320",
+        "email": "demo.organizer.1773806336@campus.local",
         "role": "ORGANIZER",
-        "createdAt": "2026-03-17T07:37:50.394Z"
+        "createdAt": "2026-03-18T03:58:56.719Z"
       }
     },
     "staff": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYzgxOTZmNi1kODA3LTQwNGYtYjI1Mi02MjlkMWNmODhhMGQiLCJlbWFpbCI6ImRlbW8uc3RhZmYuMTc3MzczMzA3MEBjYW1wdXMubG9jYWwiLCJyb2xlIjoiU1RBRkYiLCJpYXQiOjE3NzM3MzMwNzAsImV4cCI6MTc3NDMzNzg3MH0.p5ai55dSXIhE9wflEt7UysnKrrsHDtckgSIHCSft11Q",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzZjNmVhOS0zZWNlLTRiZjQtODljNS1hNTcyN2RkYTc3NmYiLCJlbWFpbCI6ImRlbW8uc3RhZmYuMTc3MzgwNjMzNkBjYW1wdXMubG9jYWwiLCJyb2xlIjoiU1RBRkYiLCJpYXQiOjE3NzM4MDYzMzYsImV4cCI6MTc3NDQxMTEzNn0.8UUaCichiTjPlyfqOMy6AZZDT0rcUFTWZhvdErRaOIg",
       "user": {
-        "id": "1c8196f6-d807-404f-b252-629d1cf88a0d",
-        "email": "demo.staff.1773733070@campus.local",
+        "id": "236c6ea9-3ece-4bf4-89c5-a5727dda776f",
+        "email": "demo.staff.1773806336@campus.local",
         "role": "STAFF",
-        "createdAt": "2026-03-17T07:37:50.467Z"
+        "createdAt": "2026-03-18T03:58:56.793Z"
       }
     },
     "attendee": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MTczMWJiNy1mMjcyLTQ5ZTItOTY3Ny0yMjIyZTVlZTQ2YzYiLCJlbWFpbCI6ImRlbW8uYXR0ZW5kZWUuMTc3MzczMzA3MEBjYW1wdXMubG9jYWwiLCJyb2xlIjoiQVRURU5ERUUiLCJpYXQiOjE3NzM3MzMwNzAsImV4cCI6MTc3NDMzNzg3MH0.64-aAJks9lg8Yi1AVyGG50gxjsN9PlsCvpKlqaUAK8g",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYTZiNjAwZC00ZThhLTRjMmUtYWFmMy0zNDBjZGM5MmYzNTQiLCJlbWFpbCI6ImRlbW8uYXR0ZW5kZWUuMTc3MzgwNjMzNkBjYW1wdXMubG9jYWwiLCJyb2xlIjoiQVRURU5ERUUiLCJpYXQiOjE3NzM4MDYzMzYsImV4cCI6MTc3NDQxMTEzNn0.SsM9uuizgbDYay6yZFxcm_szy9dBVH_jR-neALeGuu0",
       "user": {
-        "id": "71731bb7-f272-49e2-9677-2222e5ee46c6",
-        "email": "demo.attendee.1773733070@campus.local",
+        "id": "aa6b600d-4e8a-4c2e-aaf3-340cdc92f354",
+        "email": "demo.attendee.1773806336@campus.local",
         "role": "ATTENDEE",
-        "createdAt": "2026-03-17T07:37:50.538Z"
+        "createdAt": "2026-03-18T03:58:56.863Z"
       }
     }
   },
-  "staffEmail": "demo.staff.1773733070@campus.local",
+  "staffEmail": "demo.staff.1773806336@campus.local",
   "demoValues": {
-    "eventTitle": "Automated Demo Event 1773733070",
+    "eventTitle": "Automated Demo Event 1773806336",
     "eventDescription": "An event created automatically through the UI for the presentation walkthrough.",
     "eventVenue": "Hart House Great Hall",
-    "eventStartAt": "2026-03-24T05:37",
-    "eventEndAt": "2026-03-24T07:37",
+    "eventStartAt": "2026-03-25T01:58",
+    "eventEndAt": "2026-03-25T03:58",
     "eventCapacity": "120",
+    "createEventFilledPauseMs": 18000,
+    "createEventDetailPauseMs": 5000,
+    "createTicketTypeDetailPauseMs": 3000,
+    "attendeeEventDetailPauseMs": 2000,
     "ticketName": "General Admission",
     "ticketPrice": "0",
-    "ticketQuantity": "120"
+    "ticketQuantity": "120",
+    "createTicketTypeFilledPauseMs": 6000,
+    "myTicketsPagePauseMs": 11200,
+    "scannerFilledPauseMs": 3000
   },
   "segments": [
     {
@@ -64,7 +71,7 @@
     },
     {
       "start": 20,
-      "end": 50,
+      "end": 44,
       "title": "Create Event",
       "kind": "create-event",
       "actions": [
@@ -82,7 +89,7 @@
       ]
     },
     {
-      "start": 50,
+      "start": 44,
       "end": 75,
       "title": "Add Ticket Type",
       "kind": "create-ticket-type",
@@ -101,7 +108,7 @@
     },
     {
       "start": 75,
-      "end": 95,
+      "end": 92,
       "title": "Assign Staff",
       "kind": "assign-staff",
       "actions": [
@@ -119,7 +126,7 @@
       ]
     },
     {
-      "start": 95,
+      "start": 92,
       "end": 120,
       "title": "Attendee Claim Ticket",
       "kind": "claim-ticket",
@@ -138,7 +145,7 @@
     },
     {
       "start": 120,
-      "end": 145,
+      "end": 140,
       "title": "Staff Scan Success",
       "kind": "scan-success",
       "actions": [
@@ -156,7 +163,7 @@
       ]
     },
     {
-      "start": 145,
+      "start": 140,
       "end": 152,
       "title": "Duplicate Scan Prevention",
       "kind": "scan-duplicate",
