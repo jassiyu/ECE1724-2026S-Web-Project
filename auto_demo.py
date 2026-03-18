@@ -310,7 +310,7 @@ def build_manifest(data: dict) -> dict:
             },
             {
                 "start": 44,
-                "end": 75,
+                "end": 60,
                 "title": "Add Ticket Type",
                 "kind": "create-ticket-type",
                 "actions": [
@@ -327,8 +327,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 75,
-                "end": 92,
+                "start": 60,
+                "end": 77,
                 "title": "Assign Staff",
                 "kind": "assign-staff",
                 "actions": [
@@ -346,8 +346,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 92,
-                "end": 120,
+                "start": 77,
+                "end": 105,
                 "title": "Attendee Claim Ticket",
                 "kind": "claim-ticket",
                 "actions": [
@@ -364,8 +364,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 120,
-                "end": 140,
+                "start": 105,
+                "end": 125,
                 "title": "Staff Scan Success",
                 "kind": "scan-success",
                 "actions": [
@@ -383,8 +383,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 140,
-                "end": 152,
+                "start": 125,
+                "end": 137,
                 "title": "Duplicate Scan Prevention",
                 "kind": "scan-duplicate",
                 "actions": [
@@ -399,7 +399,7 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 152,
+                "start": 137,
                 "end": 180,
                 "title": "Organizer Dashboard Live Update",
                 "kind": "dashboard",
