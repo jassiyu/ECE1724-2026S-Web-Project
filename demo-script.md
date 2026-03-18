@@ -37,13 +37,11 @@ We start on the organizer side, already authenticated and looking at the event m
 
 ### `1:30-1:55`
 
-"Switching to the attendee view, we open the event detail page and use the real Claim Ticket button. The system issues a ticket for this attendee 
-
-and takes us to the ticket detail page, where we can see the ticket itself and the QR token that will be used for check-in."
+"Switching to the attendee view, once we land in the home page, we could see all events that we are allowed to attend, by simply clicking the event tab, we are able to see the system assigned QR code that will be used for check in."
 
 ### `1:55-2:20`
 
-"Now we switch to staff and open the scanner. When the QR token is submitted, the backend checks that the ticket exists, belongs to this event, and has not already been used. If everything is valid, the backend records a check-in and the staff interface returns VALID."
+"Now we switch to staff account and open the scanner. When the QR token is submitted, the backend checks that the ticket exists, belongs to this event, and has not already been used. If everything is valid, the backend records a check-in and the staff interface returns VALID."
 
 ### `2:20-2:27`
 
