@@ -37,7 +37,7 @@ We start on the organizer side, already authenticated and looking at the event m
 
 ### `1:30-1:55`
 
-"Switching to the attendee view, once we land in the home page, we could see all events that we are allowed to attend, by simply clicking the event tab, we are able to see the system assigned QR code that will be used for check in."
+"Switching to the attendee view, once we land in the home page, we could see all events that we are allowed to attend, by clicking the claim button, the system will assign us the ticket and we could see it in the my tickets pages, click into that event, this QR code that will be the one we used for check in."
 
 ### `1:55-2:20`
 
