@@ -4,50 +4,50 @@
   "durationSeconds": 180,
   "auth": {
     "organizer": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NGMxMDI3Zi1mYTQ5LTQ0MWYtYjNiMS02YmZhYjRkMTlmNGUiLCJlbWFpbCI6ImRlbW8ub3JnYW5pemVyLjE3NzM4MTExNTJAY2FtcHVzLmxvY2FsIiwicm9sZSI6Ik9SR0FOSVpFUiIsImlhdCI6MTc3MzgxMTE1MiwiZXhwIjoxNzc0NDE1OTUyfQ.m9SJ5gcJq1IFcIgbeCJMqwPDUiHqagL3h3nAxIGf5D8",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkNTg2NTdmOS0wYjNiLTQwMDYtODIzYi05YjMyMmI3NGI3NjUiLCJlbWFpbCI6ImRlbW8ub3JnYW5pemVyLjE3NzM4MTM0NTRAY2FtcHVzLmxvY2FsIiwicm9sZSI6Ik9SR0FOSVpFUiIsImlhdCI6MTc3MzgxMzQ1NCwiZXhwIjoxNzc0NDE4MjU0fQ.jeE4ckri_FvTnOYgd8g3QEtdy2XOKvGG_7iLxnac0PI",
       "user": {
-        "id": "64c1027f-fa49-441f-b3b1-6bfab4d19f4e",
-        "email": "demo.organizer.1773811152@campus.local",
+        "id": "d58657f9-0b3b-4006-823b-9b322b74b765",
+        "email": "demo.organizer.1773813454@campus.local",
         "role": "ORGANIZER",
-        "createdAt": "2026-03-18T05:19:12.541Z"
+        "createdAt": "2026-03-18T05:57:34.789Z"
       }
     },
     "staff": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiNmZlYjJmNC1kODkxLTQ4NzMtYTE1MS1kYTgyMDM5NTY5MjAiLCJlbWFpbCI6ImRlbW8uc3RhZmYuMTc3MzgxMTE1MkBjYW1wdXMubG9jYWwiLCJyb2xlIjoiU1RBRkYiLCJpYXQiOjE3NzM4MTExNTIsImV4cCI6MTc3NDQxNTk1Mn0.M69hu83VvILej300pgjFeZoTF-JveOPeIdxrrh6FFPU",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYmJmOTEwYi0wNmIxLTQ3MGItOWYxMi0yNmFlZTA2ODBiZDMiLCJlbWFpbCI6ImRlbW8uc3RhZmYuMTc3MzgxMzQ1NEBjYW1wdXMubG9jYWwiLCJyb2xlIjoiU1RBRkYiLCJpYXQiOjE3NzM4MTM0NTQsImV4cCI6MTc3NDQxODI1NH0.OCIafCleNS3fUHC4eC7mewG4a1bIj58wJ7o-5eqA1YY",
       "user": {
-        "id": "b6feb2f4-d891-4873-a151-da8203956920",
-        "email": "demo.staff.1773811152@campus.local",
+        "id": "abbf910b-06b1-470b-9f12-26aee0680bd3",
+        "email": "demo.staff.1773813454@campus.local",
         "role": "STAFF",
-        "createdAt": "2026-03-18T05:19:12.613Z"
+        "createdAt": "2026-03-18T05:57:34.861Z"
       }
     },
     "attendee": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMzU4MmMzYi1mNzYxLTRhNWUtOTYzNC03Mzc1MzY5YmNhNzMiLCJlbWFpbCI6ImRlbW8uYXR0ZW5kZWUuMTc3MzgxMTE1MkBjYW1wdXMubG9jYWwiLCJyb2xlIjoiQVRURU5ERUUiLCJpYXQiOjE3NzM4MTExNTIsImV4cCI6MTc3NDQxNTk1Mn0.shxbZAH7yWUDpQUEdNZX5C6NlPWHSsILugnxDDDt0ng",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5MjA1N2I4MS1jYjJkLTRhODAtODY1My0xMTAwYTRlNTVmMWMiLCJlbWFpbCI6ImRlbW8uYXR0ZW5kZWUuMTc3MzgxMzQ1NEBjYW1wdXMubG9jYWwiLCJyb2xlIjoiQVRURU5ERUUiLCJpYXQiOjE3NzM4MTM0NTQsImV4cCI6MTc3NDQxODI1NH0.t2QQWle7oKmdUfKhx7RCiiw-YTBCEjyfWs_eMBDsiMg",
       "user": {
-        "id": "33582c3b-f761-4a5e-9634-7375369bca73",
-        "email": "demo.attendee.1773811152@campus.local",
+        "id": "92057b81-cb2d-4a80-8653-1100a4e55f1c",
+        "email": "demo.attendee.1773813454@campus.local",
         "role": "ATTENDEE",
-        "createdAt": "2026-03-18T05:19:12.683Z"
+        "createdAt": "2026-03-18T05:57:34.931Z"
       }
     }
   },
-  "staffEmail": "demo.staff.1773811152@campus.local",
+  "staffEmail": "demo.staff.1773813454@campus.local",
   "demoValues": {
-    "eventTitle": "Automated Demo Event 1773811152",
-    "eventDescription": "An event created automatically through the UI for the presentation walkthrough.",
+    "eventTitle": "Campus Hangout 1773813454",
+    "eventDescription": "Just a casual campus event we put together for this demo.",
     "eventVenue": "Hart House Great Hall",
-    "eventStartAt": "2026-03-25T03:19",
-    "eventEndAt": "2026-03-25T05:19",
+    "eventStartAt": "2026-03-25T03:57",
+    "eventEndAt": "2026-03-25T05:57",
     "eventCapacity": "120",
-    "createEventFilledPauseMs": 18000,
+    "createEventFilledPauseMs": 14000,
     "createEventDetailPauseMs": 5000,
-    "createTicketTypeDetailPauseMs": 3000,
+    "createTicketTypeDetailPauseMs": 0,
     "attendeeEventDetailPauseMs": 2000,
     "ticketName": "General Admission",
     "ticketPrice": "0",
     "ticketQuantity": "120",
     "createTicketTypeFilledPauseMs": 6000,
-    "myTicketsPagePauseMs": 11200,
+    "myTicketsPagePauseMs": 8200,
     "scannerFilledPauseMs": 3000
   },
   "segments": [
@@ -71,7 +71,7 @@
     },
     {
       "start": 20,
-      "end": 44,
+      "end": 40,
       "title": "Create Event",
       "kind": "create-event",
       "actions": [
@@ -89,8 +89,8 @@
       ]
     },
     {
-      "start": 44,
-      "end": 60,
+      "start": 40,
+      "end": 53,
       "title": "Add Ticket Type",
       "kind": "create-ticket-type",
       "actions": [
@@ -107,8 +107,8 @@
       ]
     },
     {
-      "start": 60,
-      "end": 77,
+      "start": 53,
+      "end": 70,
       "title": "Assign Staff",
       "kind": "assign-staff",
       "actions": [
@@ -126,8 +126,8 @@
       ]
     },
     {
-      "start": 77,
-      "end": 105,
+      "start": 70,
+      "end": 91,
       "title": "Attendee Claim Ticket",
       "kind": "claim-ticket",
       "actions": [
@@ -144,8 +144,8 @@
       ]
     },
     {
-      "start": 105,
-      "end": 125,
+      "start": 91,
+      "end": 111,
       "title": "Staff Scan Success",
       "kind": "scan-success",
       "actions": [
@@ -163,8 +163,8 @@
       ]
     },
     {
-      "start": 125,
-      "end": 137,
+      "start": 111,
+      "end": 120,
       "title": "Duplicate Scan Prevention",
       "kind": "scan-duplicate",
       "actions": [
@@ -179,7 +179,7 @@
       ]
     },
     {
-      "start": 137,
+      "start": 120,
       "end": 180,
       "title": "Organizer Dashboard Live Update",
       "kind": "dashboard",

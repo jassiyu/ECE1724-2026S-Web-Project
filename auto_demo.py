@@ -214,21 +214,21 @@ def create_demo_data() -> dict:
         "attendee": attendee,
         "password": password,
         "demoValues": {
-            "eventTitle": f"Automated Demo Event {stamp}",
-            "eventDescription": "An event created automatically through the UI for the presentation walkthrough.",
+            "eventTitle": f"Campus Hangout {stamp}",
+            "eventDescription": "Just a casual campus event we put together for this demo.",
             "eventVenue": "Hart House Great Hall",
             "eventStartAt": start_at.strftime("%Y-%m-%dT%H:%M"),
             "eventEndAt": end_at.strftime("%Y-%m-%dT%H:%M"),
             "eventCapacity": "120",
-            "createEventFilledPauseMs": 18000,
+            "createEventFilledPauseMs": 14000,
             "createEventDetailPauseMs": 5000,
-            "createTicketTypeDetailPauseMs": 3000,
+            "createTicketTypeDetailPauseMs": 0,
             "attendeeEventDetailPauseMs": 2000,
             "ticketName": "General Admission",
             "ticketPrice": "0",
             "ticketQuantity": "120",
             "createTicketTypeFilledPauseMs": 6000,
-            "myTicketsPagePauseMs": 11200,
+            "myTicketsPagePauseMs": 8200,
             "scannerFilledPauseMs": 3000,
         },
     }
@@ -291,7 +291,7 @@ def build_manifest(data: dict) -> dict:
             },
             {
                 "start": 20,
-                "end": 44,
+                "end": 40,
                 "title": "Create Event",
                 "kind": "create-event",
                 "actions": [
@@ -309,8 +309,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 44,
-                "end": 60,
+                "start": 40,
+                "end": 53,
                 "title": "Add Ticket Type",
                 "kind": "create-ticket-type",
                 "actions": [
@@ -327,8 +327,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 60,
-                "end": 77,
+                "start": 53,
+                "end": 70,
                 "title": "Assign Staff",
                 "kind": "assign-staff",
                 "actions": [
@@ -346,8 +346,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 77,
-                "end": 105,
+                "start": 70,
+                "end": 91,
                 "title": "Attendee Claim Ticket",
                 "kind": "claim-ticket",
                 "actions": [
@@ -364,8 +364,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 105,
-                "end": 125,
+                "start": 91,
+                "end": 111,
                 "title": "Staff Scan Success",
                 "kind": "scan-success",
                 "actions": [
@@ -383,8 +383,8 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 125,
-                "end": 137,
+                "start": 111,
+                "end": 120,
                 "title": "Duplicate Scan Prevention",
                 "kind": "scan-duplicate",
                 "actions": [
@@ -399,7 +399,7 @@ def build_manifest(data: dict) -> dict:
                 ],
             },
             {
-                "start": 137,
+                "start": 120,
                 "end": 180,
                 "title": "Organizer Dashboard Live Update",
                 "kind": "dashboard",
