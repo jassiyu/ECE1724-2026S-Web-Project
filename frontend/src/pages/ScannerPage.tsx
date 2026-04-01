@@ -8,7 +8,6 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   clearScanResult,
   setScanResult,
-  startScanning,
 } from "../store/slices/scanSlice";
 import type { CheckInResult } from "../types";
 
@@ -53,7 +52,7 @@ function getResultView(result: CheckInResult) {
 export default function ScannerPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const dispatch = useAppDispatch();
-  const { lastResult, isScanning } = useAppSelector((state) => state.scan);
+  const { lastResult } = useAppSelector((state) => state.scan);
   const [tokenInput, setTokenInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -109,6 +108,7 @@ export default function ScannerPage() {
   
     void checkAccess();
   }, [eventId]);
+  const [isScanning, setIsScanning] = useState(false);
 
   const handleValidate = async (rawToken: string) => {
     if (!eventId) {
@@ -123,7 +123,7 @@ export default function ScannerPage() {
     }
 
     setError(null);
-    dispatch(startScanning());
+    setIsScanning(true);
 
     try {
       const result = await checkinsApi.validate(eventId, qrToken);
