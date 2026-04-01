@@ -11,17 +11,14 @@ import {
   onRoomError,
   offRoomError,
 } from "../socket";
-import type { CheckInDTO, CheckInResult, DashboardDTO } from "../types";
+import type {
+  CheckInDTO,
+  CheckInResult,
+  DashboardDTO,
+  ScanActivityDTO,
+} from "../types";
 
 type FeedStatus = CheckInResult["status"];
-
-interface ScanFeedItem {
-  id: string;
-  status: FeedStatus;
-  timestamp: string;
-  ticketId?: string;
-  message: string;
-}
 
 const FEED_LIMIT = 25;
 
@@ -29,7 +26,7 @@ function buildCheckInMessage(checkIn: CheckInDTO): string {
   return `Ticket ${checkIn.ticketId.slice(0, 8)} checked in`;
 }
 
-function toInitialFeedItem(checkIn: CheckInDTO): ScanFeedItem {
+function toInitialFeedItem(checkIn: CheckInDTO): ScanActivityDTO {
   return {
     id: `success:${checkIn.id}`,
     status: "success",
@@ -39,7 +36,7 @@ function toInitialFeedItem(checkIn: CheckInDTO): ScanFeedItem {
   };
 }
 
-function toRealtimeFeedItem(result: CheckInResult): ScanFeedItem {
+function toRealtimeFeedItem(result: CheckInResult): ScanActivityDTO {
   const nowIso = new Date().toISOString();
 
   if (result.status === "success") {
@@ -88,7 +85,7 @@ function toRealtimeFeedItem(result: CheckInResult): ScanFeedItem {
   };
 }
 
-function mergeFeedItem(current: ScanFeedItem[], item: ScanFeedItem): ScanFeedItem[] {
+function mergeFeedItem(current: ScanActivityDTO[], item: ScanActivityDTO): ScanActivityDTO[] {
   const deduped = current.filter((entry) => entry.id !== item.id);
   return [item, ...deduped].slice(0, FEED_LIMIT);
 }
@@ -128,7 +125,7 @@ export default function DashboardPage() {
   const token = useAppSelector((state) => state.auth.token);
 
   const [dashboard, setDashboard] = useState<DashboardDTO | null>(null);
-  const [feed, setFeed] = useState<ScanFeedItem[]>([]);
+  const [feed, setFeed] = useState<ScanActivityDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [socketError, setSocketError] = useState("");
@@ -147,7 +144,11 @@ export default function DashboardPage() {
         setSocketError("");
         const response = await eventsApi.getDashboard(eventId);
         setDashboard(response);
-        setFeed(response.recentCheckIns.map(toInitialFeedItem));
+        setFeed(
+          response.recentActivity.length > 0
+            ? response.recentActivity
+            : response.recentCheckIns.map(toInitialFeedItem)
+        );
       } catch (err: any) {
         setError(err?.response?.data?.error || "Failed to load dashboard.");
       } finally {

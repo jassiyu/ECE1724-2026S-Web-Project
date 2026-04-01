@@ -4,6 +4,7 @@ import { eventClient } from "../clients/event.client";
 import { eventStaffClient } from "../clients/eventStaff.client";
 import { ticketClient } from "../clients/ticket.client";
 import { emitCheckIn } from "../socket";
+import { scanActivityService } from "./scanActivity.service";
 import {
   AppError,
   CheckInResult,
@@ -82,6 +83,8 @@ export class CheckInService implements ICheckInService {
   }
 
   private broadcast(eventId: string, payload: CheckInResult): void {
+    scanActivityService.record(eventId, payload);
+
     try {
       emitCheckIn(eventId, payload);
     } catch (error) {
