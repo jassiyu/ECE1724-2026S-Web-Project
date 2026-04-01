@@ -54,7 +54,8 @@ export default function ScannerPage() {
   const dispatch = useAppDispatch();
   const { lastResult } = useAppSelector((state) => state.scan);
   const [tokenInput, setTokenInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [accessError, setAccessError] = useState<string | null>(null);
+  const [scannerError, setScannerError] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isProcessingCameraScan, setIsProcessingCameraScan] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
@@ -90,17 +91,17 @@ export default function ScannerPage() {
   useEffect(() => {
     const checkAccess = async () => {
       if (!eventId) {
-        setError("Missing event ID in route.");
+        setAccessError("Missing event ID in route.");
         setIsCheckingAccess(false);
         return;
       }
   
       try {
         setIsCheckingAccess(true);
-        setError("");
+        setAccessError(null);
         await eventsApi.getDashboard(eventId);
       } catch (err: any) {
-        setError(err?.response?.data?.error || "Failed to load scanner access.");
+        setAccessError(err?.response?.data?.error || "Failed to load scanner access.");
       } finally {
         setIsCheckingAccess(false);
       }
@@ -112,17 +113,17 @@ export default function ScannerPage() {
 
   const handleValidate = async (rawToken: string) => {
     if (!eventId) {
-      setError("Missing event ID in route.");
+      setScannerError("Missing event ID in route.");
       return;
     }
 
     const qrToken = rawToken.trim();
     if (!qrToken) {
-      setError("Enter or scan a QR token.");
+      setScannerError("Enter or scan a QR token.");
       return;
     }
 
-    setError(null);
+    setScannerError(null);
     setIsScanning(true);
 
     try {
@@ -132,8 +133,10 @@ export default function ScannerPage() {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Validation request failed.";
-      setError(message);
+      setScannerError(message);
       dispatch(clearScanResult());
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -148,7 +151,7 @@ export default function ScannerPage() {
     if (!videoRef.current || scannerRef.current) return;
 
     try {
-      setError(null);
+      setScannerError(null);
   
       const reader = new BrowserMultiFormatReader();
       scannerRef.current = reader;
@@ -156,7 +159,8 @@ export default function ScannerPage() {
       const devices = await BrowserMultiFormatReader.listVideoInputDevices();
   
       if (!devices.length) {
-        setError("No camera found on this device.");
+        stopCameraScan();
+        setScannerError("No camera found on this device.");
         return;
       }
   
@@ -188,8 +192,8 @@ export default function ScannerPage() {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to start camera scanner.";
-      setError(message);
-      setIsCameraOpen(false);
+      stopCameraScan();
+      setScannerError(message);
     }
   };
 
@@ -206,9 +210,9 @@ export default function ScannerPage() {
         <div className="w-full rounded-xl border border-gray-200 bg-white p-6 text-gray-500 shadow-sm">
           Checking scanner access...
         </div>
-      ) : error ? (
+      ) : accessError ? (
         <div className="w-full rounded-xl border border-red-200 bg-red-50 p-6 text-red-700 shadow-sm">
-          {error}
+          {accessError}
         </div>
       ) : (
         <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -216,6 +220,12 @@ export default function ScannerPage() {
           <p className="mt-1 text-sm text-gray-600">
             Event ID: <span className="font-mono">{eventId ?? "Unknown"}</span>
           </p>
+
+          {scannerError && (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {scannerError}
+            </div>
+          )}
   
           <div className="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
             Use the camera to scan a QR code, or paste the ticket token below for manual validation.

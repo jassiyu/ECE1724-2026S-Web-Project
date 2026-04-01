@@ -54,9 +54,9 @@ function toRealtimeFeedItem(result: CheckInResult): ScanFeedItem {
 
   if (result.status === "already_used") {
     return {
-      id: `already_used:${result.checkIn?.id ?? nowIso}`,
+      id: `already_used:${result.checkIn?.ticketId ?? "unknown"}:${nowIso}`,
       status: "already_used",
-      timestamp: result.checkIn?.checkedInAt ?? nowIso,
+      timestamp: nowIso,
       ticketId: result.checkIn?.ticketId,
       message: "Duplicate scan attempt detected",
     };
