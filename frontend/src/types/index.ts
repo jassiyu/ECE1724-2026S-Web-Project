@@ -124,6 +124,14 @@ export type CheckInResult =
   | { status: "wrong_event" }
   | { status: "cancelled" };
 
+export interface ScanActivityDTO {
+  id: string;
+  status: CheckInResult["status"];
+  timestamp: string;
+  ticketId?: string;
+  message: string;
+}
+
 // ─── Dashboard ───────────────────────────────────────────
 
 export interface DashboardDTO {
@@ -132,6 +140,7 @@ export interface DashboardDTO {
   checkedInCount: number;
   ticketsSold: number;
   recentCheckIns: CheckInDTO[];
+  recentActivity: ScanActivityDTO[];
 }
 
 // ─── File ────────────────────────────────────────────────

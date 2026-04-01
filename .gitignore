@@ -40,3 +40,6 @@ pgdata/
 
 # Test coverage
 coverage/
+
+# Test scripts
+scripts/

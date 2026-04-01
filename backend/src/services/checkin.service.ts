@@ -1,9 +1,10 @@
-import { CheckIn, Ticket } from "@prisma/client";
+import { CheckIn, Prisma, Ticket } from "@prisma/client";
 import { checkInClient } from "../clients/checkin.client";
 import { eventClient } from "../clients/event.client";
 import { eventStaffClient } from "../clients/eventStaff.client";
 import { ticketClient } from "../clients/ticket.client";
 import { emitCheckIn } from "../socket";
+import { scanActivityService } from "./scanActivity.service";
 import {
   AppError,
   CheckInResult,
@@ -82,6 +83,8 @@ export class CheckInService implements ICheckInService {
   }
 
   private broadcast(eventId: string, payload: CheckInResult): void {
+    scanActivityService.record(eventId, payload);
+
     try {
       emitCheckIn(eventId, payload);
     } catch (error) {
@@ -144,11 +147,29 @@ export class CheckInService implements ICheckInService {
       return result;
     }
 
-    const checkIn = await checkInClient.create({
-      ticketId: ticket.id,
-      eventId,
-      checkedInBy: staffId,
-    });
+    let checkIn: CheckIn;
+    try {
+      checkIn = await checkInClient.create({
+        ticketId: ticket.id,
+        eventId,
+        checkedInBy: staffId,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const concurrentCheckIn = await checkInClient.findByTicketId(ticket.id);
+        const result: CheckInResult = {
+          status: "already_used",
+          checkIn: concurrentCheckIn ? toCheckInDTO(concurrentCheckIn) : undefined,
+        };
+        this.broadcast(eventId, result);
+        return result;
+      }
+
+      throw error;
+    }
 
     const updatedTicket = await ticketClient.updateStatus(
       ticket.id,

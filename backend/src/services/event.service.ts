@@ -11,6 +11,7 @@ import { eventClient } from "../clients/event.client";
 import { checkInClient } from "../clients/checkin.client";
 import { eventStaffClient } from "../clients/eventStaff.client";
 import prisma from "../clients/prisma.client";
+import { scanActivityService } from "./scanActivity.service";
 
 export interface IEventService {
   listEvents(filters?: EventFilters): Promise<EventDTO[]>;
@@ -184,18 +185,24 @@ export class EventService implements IEventService {
       checkInClient.findRecentByEvent(eventId, 20),
     ]);
 
+    const recentCheckInDTOs = recentCheckIns.map((ci) => ({
+      id: ci.id,
+      ticketId: ci.ticketId,
+      eventId: ci.eventId,
+      checkedInBy: ci.checkedInBy,
+      checkedInAt: ci.checkedInAt,
+    }));
+
     return {
       eventId: event.id,
       capacity: event.capacity,
       checkedInCount,
       ticketsSold,
-      recentCheckIns: recentCheckIns.map((ci) => ({
-        id: ci.id,
-        ticketId: ci.ticketId,
-        eventId: ci.eventId,
-        checkedInBy: ci.checkedInBy,
-        checkedInAt: ci.checkedInAt,
-      })),
+      recentCheckIns: recentCheckInDTOs,
+      recentActivity: scanActivityService.buildRecentActivity(
+        eventId,
+        recentCheckInDTOs
+      ),
     };
   }
 }
