@@ -1,365 +1,465 @@
-# 1. Motivation
+# TicketGate
 
-### Problem / Need
-Small event organizers (student clubs, hobby meetups) frequently run registration and check-in using Google Forms / spreadsheets. This workflow becomes fragile at the exact moment reliability matters most: **peak arrivals**. The result is a predictable set of problems:
-
-- **Slow entry and long lines:** staff must manually search names, resolve “I registered but I’m not on the list,” and update attendance by hand.
-- **Unreliable data during live operations:** research on operational spreadsheet use finds that spreadsheet errors are common and non-trivial, which is risky when the spreadsheet is the single source of truth at the door.[1][2]
-- **Ticket misuse and duplicate entry:** Staff need a system that can validate one-time use and detect duplicates during scanning.[5]
-- **No real-time visibility:** organizers often can’t confidently answer “how many people are inside right now?”.
-
-### Why this project is worth pursuing
-A full-stack platform with QR-based tickets and a real-time check-in workflow directly fixes the highest-friction operational moment in in-person events, improves outcomes for all stakeholders:
-
-- **Organizers:** faster throughput, accurate live attendance counts, clear audit trails,, and reliable exports for post-event reporting.
-- **Staff/volunteers:** a scanning experience with immediate “valid / invalid / already used” feedback.
-- **Attendees:** faster entry and fewer “ticket not found” situations.
-
-This is also worth pursuing as a course project because the real-world needs naturally require the course’s core skills: authenticated access control, relational modeling, file storage for event assets, and real-time updates.
-
-### Target users
-- **Organizer (primary):** creates events, configures ticket types, assigns staff, monitors live attendance, and exports reports.
-- **Staff (secondary):** scans QR codes, validates tickets for assigned events only, and handles duplicates/invalid scans.
-- **Attendee (secondary):** obtains tickets and presents a QR code from “My Tickets” at entry.
-
-### Existing solutions and their limitations
-1) **DIY spreadsheets:** low setup effort, but error-prone and hard to run reliably in real time. The spreadsheet-error literature emphasizes that errors are widespread enough to represent real operational risk.[1][2]
-
-2) **Commercial ticketing platforms (Eventbrite-style tools):** they validate the approach (QR-based tickets + organizer scanning app), but may be unattractive for small organizers due to **fees** and limited customization/ownership for specific workflows.[3][4]
-
-3) **Static QR generators / printable lists:** easy to create, but without server-side validation they cannot reliably prevent reuse; fraud-prevention guidance emphasizes database-backed validation and duplicate detection.[5]
+TicketGate is a full-stack web application for event ticketing and QR-based check-in. It supports three user roles—Organizer, Staff, and Attendee—and provides an end-to-end workflow from event creation to ticket claiming, ticket validation, and live attendance tracking.
 
 ---
 
-# 2. Objective and Key Features
+## 1. Team Information
 
-### Objective
-Build a full-stack web application that supports event setup, ticket issuance, QR code validation, and real-time check-in operations. The system supports three roles (Organizer / Staff / Attendee) and provides an end-to-end workflow: create event → issue tickets → generate QR → scan & validate → record check-in → view live attendance.
-
----
-
-### Architecture (Technical implementation approach)
-**Option B: Separate Frontend & Backend**
-
-#### Frontend
-- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS](https://tailwindcss.com/docs) for styling
-- [shadcn/ui](https://ui.shadcn.com/docs) for UI components
-- Responsive UI: desktop organizer console + mobile-first staff scanner page
-- [Redux Toolkit](https://redux-toolkit.js.org/) for shared UI state (filters, selected event context, recent scan results)
-
-#### Backend
-- [Express.js](https://expressjs.com/) + [TypeScript](https://www.typescriptlang.org/docs/)
-- RESTful API providing resources for events, ticket types, tickets, check-ins, and files
-- Relational database: [PostgreSQL](https://www.postgresql.org/docs/)
-- Cloud storage integration: S3-compatible object storage ([Amazon S3 API Reference](https://docs.aws.amazon.com/AmazonS3/latest/API/Type_API_Reference.html)) for event assets
-
-#### API Documentation
-- [OpenAPI (Swagger)](https://swagger.io/specification/) specification for all REST endpoints
-- [Swagger UI](https://swagger.io/tools/swagger-ui/) served at /docs
-- Each endpoint documents authentication requirements, allowed roles (Organizer/Staff/Attendee), and example request/response payloads
+- **Ruifan Wu** — Student Number: `[TODO]` — Email: `[TODO]`
+- **Yuye Huang** — Student Number: `[TODO]` — Email: `[TODO]`
+- **Jenny You** — Student Number: `[TODO]` — Email: `[TODO]`
+- **Jasmine Shao** — Student Number: `1007147204` — Email: `jasmine.shao@mail.utoronto.ca`
 
 ---
 
-## Basic Features
+## 2. Motivation
 
-### 1) Core Features
+Small event organizers such as student clubs, hobby groups, and campus communities often still rely on Google Forms, spreadsheets, and manual check-in. This workflow becomes fragile at the exact moment reliability matters most: peak arrivals. Staff may need to search names manually, resolve registration issues at the door, and update attendance by hand. This can cause long entry lines, ticket misuse, duplicate entry, and poor live visibility into attendance.
 
-#### A) Authentication and Authorization (Advanced Feature #1)
-- User registration and login.
-- Session-based auth or JWT + refresh token.
-- Role-based access:
- - **Organizer**: manage events, assign staff, view dashboard.
- - **Staff**: validate/check in tickets for assigned events only.
- - **Attendee**: claim/view tickets in "My Tickets".
-- Authorization enforced in backend middleware 
+This problem is worth solving because a full-stack ticketing and check-in platform directly improves the highest-friction operational moment in in-person events. For organizers, it improves throughput, attendance visibility, and event management. For staff, it provides immediate validation feedback. For attendees, it shortens entry time and reduces confusion around ticket status.
 
-#### B) Event Management
-- Organizer creates/edits events: title, description, venue, start/end time, capacity.
-- Organizer configures ticket types: name, price, quantity, sale window.
-- Organizer assigns/removes staff for each event.
+This project was also a strong fit for the course because the real-world workflow naturally requires the course’s core skills: authenticated access control, relational database design, cloud-based file handling, and real-time updates. The spreadsheet-error literature also shows that spreadsheet mistakes are common enough to represent real operational risk in practice.[1][2]
 
-#### C) Ticket + QR Issuance
-- Attendee claims a ticket (MVP: free claim).
-- Backend creates `Ticket` with unique opaque `qrToken`.
-- Frontend renders QR from token only (no sensitive data in payload).
+### Target Users
 
-#### D) Check-In Validation
-- Staff scans QR (camera + manual fallback).
-- Frontend sends token to backend validation endpoint.
-- Backend verifies ticket ownership/event match/status/duplicate usage.
-- On success, backend writes `CheckIn` (time + staff ID).
+- **Organizer**: creates and manages events, configures ticket types, assigns staff, monitors attendance, and manages event assets.
+- **Staff**: validates tickets for assigned events and handles duplicate or invalid scans.
+- **Attendee**: claims tickets and presents a QR code or token at entry.
 
-#### E) Real-Time Dashboard
-- Live checked-in count vs capacity.
-- Recent scan feed + invalid/duplicate alerts.
-- Implemented with Socket.IO rooms
+### Existing Solutions and Their Limitations
 
-#### F) Cloud File Storage
-- Upload/display event poster (PNG/JPG), optional venue map (PDF).
-- Frontend uploads via pre-signed URL.
-- Backend stores file metadata and links to `Event`.
-- Optional enhancement: file validation, poster thumbnail, PDF preview metadata.
+1. **DIY spreadsheets**: easy to start with, but error-prone and difficult to use reliably in real time.[1][2]
+2. **Commercial ticketing platforms**: they validate the usefulness of QR-based tickets and organizer scanning apps, but they may be less attractive for small organizers because of fees and limited customization.[3][4]
+3. **Static QR generators or printable lists**: easy to create, but without server-side validation they cannot reliably prevent reuse or duplicate entry.[5]
 
 ---
 
-### 2) MVP Scope
+## 3. Objectives
 
-#### In-Scope
-- Event creation/editing, ticket type setup, staff assignment.
-- Ticket claim + QR display in "My Tickets".
-- Staff validation/check-in flow with duplicate prevention.
-- Live attendance updates on the dashboard.
-- Poster upload and display.
+The main objective of TicketGate was to build a complete event workflow with the following path:
 
-#### Out-of-Scope
-- Payments/refunds.
-- Discount codes, waitlist, custom registration forms.
-- Email/SMS notifications.
-- Advanced analytics.
-- Multi-tenant organization/billing.
+**create event → configure ticket type → assign staff → claim ticket → generate QR/token → validate at entry → record check-in → update live dashboard**
 
-#### Success Metrics
-- Check-in validation typically completes within **3 seconds** in demo conditions.
-- Re-scan of an already used ticket returns `already_used`.
-- Unauthorized role actions are blocked by protected APIs.
-- Dashboard reflects new check-ins within **5 seconds**.
-- Dashboard totals match persisted `CheckIn` records.
-- End-to-end demo works: create event -> claim ticket -> check in -> dashboard updates.
+More specifically, our team aimed to:
+
+- support authenticated access for Organizer, Staff, and Attendee roles
+- allow organizers to create and edit events
+- allow organizers to configure ticket types for each event
+- allow attendees to claim tickets and view them in **My Tickets**
+- support secure one-time validation using an opaque QR/token value
+- prevent duplicate ticket use
+- show live attendance information in a real-time dashboard
+- support cloud-based file handling for event poster assets
+
+To keep the project manageable, we focused on the core lifecycle and intentionally kept payments, discount codes, email notifications, advanced analytics, and other larger platform features out of scope for the MVP.
 
 ---
 
-### 3) Database Model
+## 4. Technical Stack
 
-Use **PostgreSQL + Prisma** 
+Our implementation follows a **separate frontend and backend architecture**.
 
-**Tables**
-- `User`: `id`, `email`, `passwordHash`, `role`, `createdAt`
-- `Event`: `id`, `organizerId`, `title`, `description`, `venue`, `startAt`, `endAt`, `capacity`, `posterFileId`, `createdAt`
-- `EventStaff`: `eventId`, `userId` (unique pair)
-- `TicketType`: `id`, `eventId`, `name`, `priceCents`, `quantity`, `salesStartAt`, `salesEndAt`
-- `Ticket`: `id`, `eventId`, `ticketTypeId`, `ownerId`, `status`, `qrToken` (unique), `createdAt`
-- `CheckIn`: `id`, `ticketId` (unique), `eventId`, `checkedInBy`, `checkedInAt`
-- `FileObject`: `id`, `ownerId`, `bucketKey`, `mimeType`, `sizeBytes`, `originalName`, `createdAt`
+### Frontend
 
-**Key Constraints**
-- `CheckIn.ticketId` unique 
-- Staff must be assigned in `EventStaff` for event check-in.
-- `Ticket.qrToken` unique and random.
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Redux Toolkit
+- Axios
+- React Router
+- Socket.IO client
 
----
+### Backend
 
-### 4) REST API (MVP)
+- Express.js
+- TypeScript
+- Prisma ORM
+- JWT-based authentication and authorization middleware
+- Socket.IO for real-time updates
+- Swagger / OpenAPI documentation
 
-**Auth**
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /auth/logout`
-- `GET /auth/me`
+### Database and Storage
 
-**Events**
-- `GET /events`
-- `GET /events/:eventId`
-- `POST /events` (Organizer)
-- `PUT /events/:eventId` (Organizer)
-- `GET /events/:eventId/dashboard` (Organizer/Staff)
+- PostgreSQL for relational data
+- S3-compatible object storage for event poster file handling
+- `[TODO: add exact local/dev storage service if used, e.g. MinIO]`
 
-**Event Staff**
-- `GET /events/:eventId/staff` (Organizer)
-- `POST /events/:eventId/staff` (Organizer)
-- `DELETE /events/:eventId/staff/:userId` (Organizer)
+### Architectural Approach
 
-**Ticket Types**
-- `POST /events/:eventId/ticket-types` (Organizer)
-- `GET /events/:eventId/ticket-types` (Public)
+The backend uses a three-layer structure:
 
-**Tickets**
-- `POST /events/:eventId/tickets` (Attendee)
-- `GET /me/tickets` (Attendee)
-- `GET /tickets/:ticketId` (Owner or authorized Organizer/Staff)
+- **Resources / routes** for HTTP endpoints
+- **Services** for application logic
+- **Clients** for database and storage access
 
-**Check-Ins**
-- `POST /events/:eventId/checkins/validate` (Staff)
-- `GET /events/:eventId/checkins/recent` (Organizer/Staff)
-
-**Files**
-- `POST /files/presign-upload`
-- `GET /files/:fileId/download`
+This separation helped keep the codebase organized and made it easier to debug, test, and extend features.
 
 ---
 
-### 5) UI Scope
+## 5. Features
 
-- **Public:** event list + event detail.
-- **Attendee:** "My Tickets" + QR ticket detail.
-- **Staff:** mobile scanner with large valid/invalid/used feedback and recent result.
-- **Organizer:** event management, ticket type management, staff assignment, live attendance dashboard.
+This section summarizes the main features of the application and explains how they satisfy the project objectives and course requirements.
 
+### 5.1 Authentication and Authorization
 
+Users can register and log in as Organizer, Staff, or Attendee. Protected frontend routes and backend middleware ensure that users only access the features allowed for their role.
 
+Examples:
+- only organizers can create and edit events
+- only organizers can assign staff
+- only attendees can claim tickets and view **My Tickets**
+- only assigned staff can validate tickets for a specific event
 
-## Planned Advanced Features
+This fulfills one of our planned advanced features: role-based authentication and authorization.
 
-### Advanced Feature #1: User Authentication and Authorization
-- Registration and login for all users
-- Token- or session-based authentication (e.g., JWT + refresh token or session cookies)
-- Protected routes/APIs enforced by Express middleware (requireAuth)
-- Role-based access control (requireRole) for Organizer / Staff / Attendee actions:
-  - Organizer: create/manage events, assign staff, view analytics
-  - Staff: scan/check-in for assigned events only
-  - Attendee: claim/view tickets (“My Tickets”)
-- Authorization checks are performed server-side (not only in the frontend)
+### 5.2 Event Management
 
-### Advanced Feature #2: Real-Time Functionality (Live check-in dashboard)
-- Organizers (and staff) see live updates without refresh:
-  - checked-in count vs capacity
-  - recent scan activity feed
-  - alerts for invalid/duplicate scans
-- Real-time updates are delivered via WebSockets (Socket.IO) from the Express backend, with clients subscribing to an event-specific channel/room.
+Organizers can create and edit events with:
+- title
+- description
+- venue
+- start time
+- end time
+- capacity
+- poster file reference
 
----
+This satisfies the core event management requirement in our proposal and forms the base of the organizer workflow.
 
-## Scope and feasibility
-The MVP will focus on the main end-to-end workflow of the system: an organizer creates an event and ticket types, an attendee claims a ticket and receives a QR code, staff scan and validate the QR to check the attendee in, and the organizer dashboard shows the updated attendance (with live updates for the real-time requirement). This scope covers the core project requirements: a React frontend + Express REST backend, a relational database for ticket/check-in records, and cloud storage for event assets.
+### 5.3 Ticket Type Management
 
-To keep the workload manageable, features will be built in small modules (auth/RBAC, event management, ticket issuing, check-in validation, dashboard, file upload) and integrated step by step. Optional features like paid checkout, discount codes, waitlist, email confirmations, and custom registration forms will only be attempted after the MVP is stable.
+Organizers can create ticket types for an event, including:
+- ticket type name
+- price
+- quantity
+- sales start time
+- sales end time
 
----
+This supports the organizer-side setup flow and makes event configuration possible before ticket claiming begins.
 
-# 3. Tentative Plan
+### 5.4 Ticket Claiming and QR / Token Issuance
 
-## Team roles and responsibilities
-- **Ruifan: Project lead and backend developer**  
-  Define endpoints and data flow.<br>
-  Implement core event, ticket, and check-in logic.<br>
-  Review pull requests and keep features integrated.
+Attendees can claim a ticket from the event detail page. After claiming, the ticket appears in **My Tickets**, and the ticket detail page shows the ticket information and QR/token content.
 
-- **Siyu: Frontend developer**  
-  Build the main pages for attendees and organizers.<br>
-  Implement navigation and core UI states.<br>
-  Ensure the app is responsive on desktop and mobile.
+As planned in our MVP, the current implementation uses a free-claim model rather than full payment processing. Payment and refund flows were intentionally kept out of scope to keep the main event lifecycle stable.
 
-- **Yuye: Check-in and QR workflow developer**  
-  Build the staff scanning experience.<br>
-  Implement validation results and duplicate handling UI.<br>
-  Test scanning flow end-to-end with realistic scenarios.
+### 5.5 Ticket Validation and Duplicate Prevention
 
-- **Jenny: Real-time, files, and documentation developer**  
-  Implement live dashboard updates for check-ins.<br>
-  Implement event asset upload and display.<br>
-  Maintain API documentation and run final QA checks.
+Staff can validate tickets through the scanner page. The system checks:
+- whether the token exists
+- whether the ticket belongs to the current event
+- whether the ticket is cancelled
+- whether the ticket has already been used
 
-## week-by-week plan
-**Week 1: Foundation**
-- Set up repo, branch workflow, and basic app structure.
-- Create initial pages for Event List and Event Details.
-- Define the first version of the data model and endpoints.
+The validation result clearly distinguishes among:
+- `success`
+- `already_used`
+- `wrong_event`
+- `cancelled`
+- `invalid_ticket`
 
-**Week 2: Organizer flow**
-- Build organizer login and protected dashboard access.
-- Implement create event and edit event forms.
-- Connect organizer pages to create and fetch events.
+This implements the core check-in validation workflow and duplicate prevention behavior described in our proposal.
 
-**Week 3: Ticket issuance and My Tickets**
-- Implement ticket types and basic ticket claiming flow.
-- Generate and display QR codes in My Tickets.
-- Build navigation between Event Details and My Tickets.
+### 5.6 Scanner Page with Camera and Manual Fallback
 
-**Week 4: Staff check-in**
-- Build mobile-first scan page and manual code entry fallback.
-- Connect scan results to validation and check-in actions.
-- Display clear states for valid, invalid, and already used tickets.
+The staff scanner page supports both manual token entry and camera-based QR scanning. We kept manual input as a fallback so that the same backend validation logic still works even if camera scanning is unavailable on a specific device.
 
-**Week 5: Live dashboard and event assets**
-- Show live attendance count and recent scan activity.
-- Broadcast updates when check-ins happen.
-- Upload and display event poster images on listings and event pages.
+This improves usability while keeping the validation flow reliable during demos and local testing.
 
-**Week 6: Polish, testing, and presentation**
-- Run full end-to-end test of the event lifecycle with multiple roles.
-- Improve UI consistency, error handling, and loading states.
-- Finalize API documentation and prepare the demo script.
----
+### 5.7 Live Dashboard
 
-# 4. Initial Independent Reasoning
+The organizer dashboard displays:
+- checked-in count
+- event capacity
+- tickets sold
+- occupancy percentage
+- recent scan feed
 
-### Application structure and architecture
+New check-ins and duplicate or invalid scan events are pushed in real time using Socket.IO. This fulfills our second advanced feature: real-time functionality.
 
-We selected a **separate React frontend + Express backend** to practice real-world separation of concerns. This keeps backend responsibilities clear (REST resources + auth + validation), supports OpenAPI documentation, and reflects common industry deployments where frontend and backend scale independently.
+### 5.8 Staff Assignment
 
-### Data and state design
+Organizers can assign staff members to specific events. Staff assignment is enforced server-side during check-in validation, so a staff user cannot validate tickets for an event they are not assigned to.
 
-We designed around a relational core:
+This keeps scanner access event-specific and consistent with the system’s role-based design.
 
-* Events connect to ticket types, tickets, and check-ins.
-* Staff assignment is many-to-many between users and events.
+### 5.9 Cloud File Handling for Event Posters
 
-Authoritative state (tickets, check-ins) remains server-driven for correctness, while client state handles UI flow and scan feedback.
+The project includes cloud-based file handling for event posters using S3-compatible storage. Organizers can upload and download poster files for events, while the backend stores file metadata and links each uploaded file to its corresponding event record.
 
-### Feature selection and scope decisions
-
-We focused on the ticket lifecycle:
-
-* Event creation, ticket issuance, QR validation, check-in
-
-Advanced features:
-
-* **Auth + RBAC** to enforce staff/organizer boundaries
-* **Real-time updates** to sync check-ins across devices
-
-We deferred payments and complex registration to reduce risk and scope.
-
-### Anticipated challenges
-
-We expected challenges in:
-
-* RBAC enforcement across endpoints
-* Preventing QR forgery (opaque tokens + server validation)
-* WebSocket event scoping (emit only to relevant rooms)
-* Mobile scanning usability (permissions, fast feedback)
-
-### Early collaboration plan
-
-We split work by system boundary:
-
-* Backend/API + docs
-* Frontend UI + flows
-* Real-time + storage integration
-
-Coordination through a shared task board and PR reviews aimed to prevent integration drift.
+This addresses the course requirement that all projects support basic uploading, downloading, and database association for files.
 
 ---
 
-# 5. AI Assistance Disclosure
+## 6. User Guide
 
-### Developed without AI
+### 6.1 Public User Flow
 
-* Project theme selection (event ticketing + QR check-in)
-* MVP lifecycle definition and scope prioritization
-* Core entities (Event, Ticket, CheckIn, Staff assignment)
-* Division of responsibilities
+1. Open the event list page.
+2. Browse available events.
+3. Click an event to open the event detail page.
 
-### AI assistance
+**Suggested screenshot:**  
+`[TODO: insert screenshot path for public event list]`
 
-AI helped refine structure, clarity, and alignment with the grading rubric. It improved REST API naming consistency, endpoint grouping, and reduced redundancy. It also stress-tested our QR validation workflow by surfacing edge cases (duplicate scans, wrong-event tickets, voided/refunded tickets) and clarifying our real-time update explanation.
+### 6.2 Attendee Flow
 
-### One AI-influenced decision
+1. Register or log in as an attendee.
+2. Open an event detail page.
+3. Click **Claim Ticket**.
+4. After claiming, go to **My Tickets**.
+5. Open the ticket detail page to view the ticket and QR/token.
 
-AI suggested including identifiers in the QR payload. We chose instead to use an opaque random token resolved server-side, improving privacy and simplifying revocation, with acceptable reliance on network validation.
+**Suggested screenshots:**  
+- `[TODO: attendee event detail page]`
+- `[TODO: My Tickets page]`
+- `[TODO: ticket detail page with QR/token]`
+
+### 6.3 Organizer Flow
+
+1. Register or log in as an organizer.
+2. Click **Create Event**.
+3. Fill in the event information and save the event.
+4. Open the event edit page.
+5. Add one or more ticket types.
+6. Assign staff members to the event by email.
+7. Open the live dashboard to monitor attendance.
+
+**Suggested screenshots:**  
+- `[TODO: create event page]`
+- `[TODO: edit event page]`
+- `[TODO: add ticket type page]`
+- `[TODO: staff assignment page]`
+- `[TODO: organizer dashboard]`
+
+### 6.4 Staff Flow
+
+1. Log in as a staff user.
+2. Open the scanner page for the assigned event.
+3. Either:
+   - scan a QR code with the camera, or
+   - paste or type the ticket token manually
+4. The page will display one of the validation results, such as VALID or ALREADY USED.
+
+**Suggested screenshots:**  
+- `[TODO: scanner page]`
+- `[TODO: scanner VALID result]`
+- `[TODO: scanner ALREADY USED result]`
+
+### 6.5 Poster Flow
+
+1. Organizer opens create or edit event.
+2. Uploads a poster image file.
+3. Saves the event.
+4. Event detail page displays the uploaded poster.
+5. The poster can be downloaded through the stored file reference.
+
+**Suggested screenshots:**  
+- `[TODO: poster upload form]`
+- `[TODO: event detail page showing poster]`
 
 ---
 
-# References
+## 7. Development Guide
 
-[1] S. G. Powell, K. R. Baker, and B. Lawson, “A critical review of the literature on spreadsheet errors,” *Decision Support Systems*, vol. 46, no. 1, pp. 128–138, Dec. 2008, doi: 10.1016/j.dss.2008.06.001.
+### 7.1 Environment Setup
 
-[2] R. R. Panko, “Spreadsheet Errors: What We Know. What We Think We Can Do,” *arXiv preprint* arXiv:0802.3457, Feb. 2008, doi: 10.48550/arXiv.0802.3457. [Online]. Available: https://arxiv.org/abs/0802.3457. Accessed: Feb. 22, 2026.
+Prerequisites:
+- Node.js 18+
+- PostgreSQL
+- `[TODO: local S3-compatible storage service if used]`
+- npm
 
-[3] Eventbrite, “How to check in attendees at the event with Eventbrite Organizer,” *Eventbrite Help Center*. [Online]. Available: https://www.eventbrite.ca/help/en-ca/articles/741083/how-to-check-in-attendees-at-the-event-with-eventbrite-organizer/. Accessed: Feb. 22, 2026.
+Clone the repository and install dependencies:
 
-[4] Eventbrite, “Pricing and features for organizers (Canada),” *Eventbrite Organizer Pricing*. [Online]. Available: https://www.eventbrite.ca/organizer/pricing/. Accessed: Feb. 22, 2026.
+```bash
+git clone [TODO: repo-url]
+cd ECE1724-2026S-Web-Project
+```
 
-[5] Ticket Fairy, “Preventing Ticket Fraud and Scalping at Festivals,” Jul. 11, 2025, updated Jan. 22, 2026. [Online]. Available: https://www.ticketfairy.com/blog/preventing-ticket-fraud-and-scalping-at-festivals. Accessed: Feb. 22, 2026.
+Backend:
 
+```bash
+cd backend
+npm install
+```
 
+Frontend:
+
+```bash
+cd ../frontend
+npm install
+```
+
+### 7.2 Backend Configuration
+
+Create `backend/.env` and configure the required variables.
+
+Example:
+
+```env
+DATABASE_URL=[TODO]
+JWT_SECRET=[TODO]
+S3_ENDPOINT=[TODO]
+S3_BUCKET=[TODO]
+S3_ACCESS_KEY=[TODO]
+S3_SECRET_KEY=[TODO]
+S3_REGION=[TODO]
+```
+
+`[TODO: update variable names so they match your real backend config]`
+
+### 7.3 Database Initialization
+
+From the backend directory:
+
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Optional reset for a clean local database:
+
+```bash
+npx prisma migrate reset
+```
+
+### 7.4 Cloud Storage Configuration
+
+To enable poster upload and retrieval:
+- start the S3-compatible storage service
+- create the bucket configured in the backend environment
+- ensure the backend can generate pre-signed upload URLs
+- ensure the storage service allows local development access as needed
+
+`[TODO: add concrete local instructions if you used MinIO or another local storage service]`
+
+### 7.5 Run the Project Locally
+
+Backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Expected local URLs:
+- frontend: `http://localhost:5173`
+- backend: `http://localhost:3000`
+- backend health route: `http://localhost:3000/health`
+
+### 7.6 Testing and Verification
+
+Our team verified correctness mainly through end-to-end user-flow testing across all three roles.
+
+The main tested flow was:
+1. organizer creates an event
+2. organizer adds a ticket type
+3. organizer assigns staff
+4. attendee claims a ticket
+5. attendee views ticket detail and QR token
+6. staff validates the ticket
+7. organizer dashboard updates in real time
+
+We also manually verified:
+- duplicate scan behavior
+- invalid token behavior
+- route and API protection for unauthorized roles
+- staff assignment restrictions for event-specific actions
+
+`[TODO: add test commands if you have frontend vitest tests or backend tests]`
+
+Example frontend test command:
+
+```bash
+cd frontend
+npm test
+```
+
+---
+
+## 8. AI Assistance & Verification (Summary)
+
+AI tools were used as development support tools rather than as a source of unverified final answers. The main areas where AI contributed were:
+- architecture and scope clarification
+- debugging frontend and backend integration issues
+- route and API naming consistency
+- documentation drafting and cleanup
+- edge-case discussion for scanner and validation logic
+
+One representative limitation was that AI sometimes suggested code or library usage that did not match our actual environment or dependency versions. For example, some scanner-library suggestions conflicted with our React version and had to be rejected or replaced after verification.
+
+We verified correctness through:
+- manual end-to-end testing across Organizer, Staff, and Attendee flows
+- checking logs and API behavior during debugging
+- validating role-based access restrictions
+- checking dashboard updates against persisted check-in results
+- running the available frontend tests and local integration checks
+
+See **`ai-session.md`** for concrete examples of AI usage, mistakes, and follow-up verification.
+
+---
+
+## 9. Individual Contributions
+
+### Ruifan Wu
+- Led the backend foundation and core integration work.
+- Implemented authentication and authorization support, including backend middleware for protected access control.
+- Built core backend support for event-related APIs and services, including event CRUD and organizer-facing backend logic.
+- Helped maintain consistent backend structure, endpoint behavior, and integration across modules.
+
+### Yuye Huang
+- Focused on the ticket and check-in workflow.
+- Implemented ticket claim logic and attendee-side ticket pages, including My Tickets and ticket detail display.
+- Built the validation flow for scanner results, including support for success, already used, invalid ticket, wrong event, and cancelled states.
+- Helped test and verify the end-to-end ticket lifecycle and duplicate-prevention behavior.
+
+### Jenny You
+- Focused on advanced features and organizer-side operational tools.
+- Implemented real-time functionality for the live dashboard using Socket.IO.
+- Worked on file-handling support and event asset integration, including poster-related storage flow.
+- Built organizer-facing staff assignment and dashboard functionality, and contributed to ticket-type and organizer operations support.
+- Helped maintain API documentation and final QA and integration checks.
+
+### Jasmine Shao
+- Built the frontend shell, routing structure, and shared client-side setup.
+- Implemented login/register flow integration, protected routes, and the main organizer and public event pages.
+- Worked on the core event-related frontend experience, including event list, event detail, create event, and edit event pages.
+- Contributed to later frontend polish and integration work, including scanner-page improvements, ticket-type management flow updates, and role-based page consistency.
+
+`[TODO: adjust if needed]`
+
+---
+
+## 10. Lessons Learned and Concluding Remarks
+
+This project helped us understand how much coordination is required to build even a focused full-stack system with multiple user roles. A workflow that appears simple from the outside—create event, claim ticket, check in attendee—requires many connected parts behind the scenes: relational modeling, route protection, event-specific permissions, frontend state handling, real-time updates, and file integration.
+
+One major lesson was that keeping the scope focused was important. Our proposal intentionally kept payments, waitlists, advanced analytics, and other larger features out of the MVP so that we could first deliver a stable end-to-end workflow. That decision helped us prioritize the most important path: event creation, ticket issuance, validation, and dashboard updates.
+
+We also learned that backend authorization must remain the real source of truth, especially for event-specific actions such as dashboard access and ticket validation. Another practical lesson was that real-time features and camera-based scanning are often less difficult in theory than in browser and device behavior, so stable fallback behavior matters.
+
+Overall, TicketGate achieved the main goals set out in our proposal: a separate React + Express architecture, role-based access control, ticket lifecycle support, event-specific validation, and real-time attendance visibility.
+
+---
+
+## 11. References
+
+[1] S. G. Powell, K. R. Baker, and B. Lawson, “A critical review of the literature on spreadsheet errors,” *Decision Support Systems*, vol. 46, no. 1, pp. 128–138, Dec. 2008.
+
+[2] R. R. Panko, “Spreadsheet Errors: What We Know. What We Think We Can Do,” *arXiv preprint* arXiv:0802.3457, Feb. 2008.
+
+[3] Eventbrite, “How to check in attendees at the event with Eventbrite Organizer,” *Eventbrite Help Center*.
+
+[4] Eventbrite, “Pricing and features for organizers (Canada),” *Eventbrite Organizer Pricing*.
+
+[5] Ticket Fairy, “Preventing Ticket Fraud and Scalping at Festivals,” Jul. 11, 2025, updated Jan. 22, 2026.
 
