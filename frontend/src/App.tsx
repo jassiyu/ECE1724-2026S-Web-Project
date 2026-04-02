@@ -52,7 +52,7 @@ function AppLayout() {
       <header className="border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 gap-4">
           <Link to="/events" className="font-semibold text-lg">
-            Campus Events
+            TicketGate
           </Link>
           <nav className="flex items-center gap-3 text-sm">
             <Link to="/events" className="hover:underline">
