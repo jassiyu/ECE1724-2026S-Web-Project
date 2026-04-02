@@ -27,4 +27,8 @@ export const filesApi = {
   getDownloadUrl(fileId: string): string {
     return `/api/files/${encodeURIComponent(fileId)}/download`;
   },
+
+  getAttachmentUrl(fileId: string): string {
+    return `/api/files/${encodeURIComponent(fileId)}/download?attachment=true`;
+  },
 };

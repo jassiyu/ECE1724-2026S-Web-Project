@@ -8,7 +8,7 @@ export interface IFileService {
     ownerId: string,
     input: PresignUploadInput
   ): Promise<PresignUploadResponse>;
-  getDownloadUrl(fileId: string): Promise<string>;
+  getDownloadUrl(fileId: string, attachment?: boolean): Promise<string>;
 }
 
 const ALLOWED_MIME_TYPES = new Set(["image/png", "image/jpeg", "application/pdf"]);
@@ -68,13 +68,17 @@ export class FileService implements IFileService {
     }
   }
 
-  async getDownloadUrl(fileId: string): Promise<string> {
+  async getDownloadUrl(fileId: string, attachment?: boolean): Promise<string> {
     const file = await fileClient.findById(fileId);
     if (!file) {
       throw AppError.notFound("File not found");
     }
 
-    return s3Client.getPresignedDownloadUrl(file.bucketKey);
+    return s3Client.getPresignedDownloadUrl(
+      file.bucketKey,
+      900,
+      attachment ? file.originalName : undefined
+    );
   }
 }
 
