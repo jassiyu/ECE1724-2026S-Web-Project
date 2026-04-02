@@ -7,7 +7,7 @@ TicketGate is a full-stack web application for event ticketing and QR-based chec
 ## 1. Team Information
 
 - **Ruifan Wu** — Student Number: `[TODO]` — Email: `[TODO]`
-- **Yuye Huang** — Student Number: `[TODO]` — Email: `[TODO]`
+- **Yuye Huang** — Student Number: 1006663905 — Email: yuye.huang@mail.utoronto.ca
 - **Jenny You** — Student Number: 1006779657 — Email: jenny.you@mail.utoronto.ca
 - **Jasmine Shao** — Student Number: 1007147204 — Email: jasmine.shao@mail.utoronto.ca
 
