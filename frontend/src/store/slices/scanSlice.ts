@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { CheckInResult } from "../../types";
+import type{ CheckInResult } from "../../types";
 
 interface ScanState {
   lastResult: CheckInResult | null;

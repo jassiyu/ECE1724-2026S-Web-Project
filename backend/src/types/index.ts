@@ -97,7 +97,7 @@ export interface EventFilters {
 // ─── DTOs: Event Staff ───────────────────────────────────
 
 export interface AddStaffInput {
-  userId: string;
+  email?: string;
 }
 
 export interface EventStaffDTO {
@@ -175,6 +175,14 @@ export type CheckInResult =
   | { status: "wrong_event" }
   | { status: "cancelled" };
 
+export interface ScanActivityDTO {
+  id: string;
+  status: CheckInResult["status"];
+  timestamp: Date;
+  ticketId?: string;
+  message: string;
+}
+
 // ─── DTOs: Dashboard ─────────────────────────────────────
 
 export interface DashboardDTO {
@@ -183,6 +191,7 @@ export interface DashboardDTO {
   checkedInCount: number;
   ticketsSold: number;
   recentCheckIns: CheckInDTO[];
+  recentActivity: ScanActivityDTO[];
 }
 
 // ─── DTOs: File ──────────────────────────────────────────

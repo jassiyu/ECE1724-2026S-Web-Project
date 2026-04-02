@@ -1,4 +1,5 @@
 import { FileObject } from "@prisma/client";
+import prisma from "./prisma.client";
 
 export interface IFileClient {
   findById(id: string): Promise<FileObject | null>;
@@ -12,27 +13,23 @@ export interface IFileClient {
   delete(id: string): Promise<void>;
 }
 
-// TODO: Implement FileClient using prisma
 export class FileClient implements IFileClient {
-  async findById(_id: string): Promise<FileObject | null> {
-    // TODO: prisma.fileObject.findUnique({ where: { id } })
-    throw new Error("Not implemented");
+  async findById(id: string): Promise<FileObject | null> {
+    return prisma.fileObject.findUnique({ where: { id } });
   }
 
-  async create(_data: {
+  async create(data: {
     ownerId: string;
     bucketKey: string;
     mimeType: string;
     sizeBytes: number;
     originalName: string;
   }): Promise<FileObject> {
-    // TODO: prisma.fileObject.create({ data })
-    throw new Error("Not implemented");
+    return prisma.fileObject.create({ data });
   }
 
-  async delete(_id: string): Promise<void> {
-    // TODO: prisma.fileObject.delete({ where: { id } })
-    throw new Error("Not implemented");
+  async delete(id: string): Promise<void> {
+    await prisma.fileObject.delete({ where: { id } });
   }
 }
 

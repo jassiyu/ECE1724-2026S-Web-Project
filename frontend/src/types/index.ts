@@ -1,16 +1,8 @@
-// ─── Enums ───────────────────────────────────────────────
+// ─── Literal Types ───────────────────────────────────────────────
 
-export enum UserRole {
-  ORGANIZER = "ORGANIZER",
-  STAFF = "STAFF",
-  ATTENDEE = "ATTENDEE",
-}
+export type UserRole = "ORGANIZER" | "STAFF" | "ATTENDEE";
 
-export enum TicketStatus {
-  VALID = "VALID",
-  USED = "USED",
-  CANCELLED = "CANCELLED",
-}
+export type TicketStatus = "VALID" | "USED" | "CANCELLED";
 
 // ─── Auth ────────────────────────────────────────────────
 
@@ -132,6 +124,14 @@ export type CheckInResult =
   | { status: "wrong_event" }
   | { status: "cancelled" };
 
+export interface ScanActivityDTO {
+  id: string;
+  status: CheckInResult["status"];
+  timestamp: string;
+  ticketId?: string;
+  message: string;
+}
+
 // ─── Dashboard ───────────────────────────────────────────
 
 export interface DashboardDTO {
@@ -140,6 +140,7 @@ export interface DashboardDTO {
   checkedInCount: number;
   ticketsSold: number;
   recentCheckIns: CheckInDTO[];
+  recentActivity: ScanActivityDTO[];
 }
 
 // ─── File ────────────────────────────────────────────────

@@ -1,7 +1,8 @@
 import { Router, Response, NextFunction } from "express";
-import { AuthenticatedRequest, UserRole } from "../types";
+import { AppError, AuthenticatedRequest, UserRole } from "../types";
 import { requireAuth } from "../middleware/auth.middleware";
 import { requireRole } from "../middleware/role.middleware";
+import { eventStaffService } from "../services/eventStaff.service";
 
 const router = Router({ mergeParams: true });
 
@@ -10,12 +11,16 @@ router.get(
   "/",
   requireAuth,
   requireRole(UserRole.ORGANIZER),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const staff = await eventStaffService.listStaff(req.params.eventId);
-      // res.json(staff);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const staff = await eventStaffService.listStaff(eventId, req.user!.userId);
+      res.json(staff);
     } catch (err) {
       next(err);
     }
@@ -27,12 +32,20 @@ router.post(
   "/",
   requireAuth,
   requireRole(UserRole.ORGANIZER),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // const staff = await eventStaffService.addStaff(req.params.eventId, req.user!.userId, req.body);
-      // res.status(201).json(staff);
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const staff = await eventStaffService.addStaff(
+        eventId,
+        req.user!.userId,
+        req.body
+      );
+      res.status(201).json(staff);
     } catch (err) {
       next(err);
     }
@@ -44,12 +57,26 @@ router.delete(
   "/:userId",
   requireAuth,
   requireRole(UserRole.ORGANIZER),
-  async (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // TODO:
-      // await eventStaffService.removeStaff(req.params.eventId, req.user!.userId, req.params.userId);
-      // res.status(204).send();
-      throw new Error("Not implemented");
+      const eventParam = req.params.eventId;
+      const eventId = Array.isArray(eventParam) ? eventParam[0] : eventParam;
+      if (!eventId) {
+        throw AppError.badRequest("Missing eventId");
+      }
+
+      const userParam = req.params.userId;
+      const userId = Array.isArray(userParam) ? userParam[0] : userParam;
+      if (!userId) {
+        throw AppError.badRequest("Missing userId");
+      }
+
+      await eventStaffService.removeStaff(
+        eventId,
+        req.user!.userId,
+        userId
+      );
+      res.status(204).send();
     } catch (err) {
       next(err);
     }
