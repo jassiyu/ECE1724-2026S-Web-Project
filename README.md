@@ -148,8 +148,9 @@ This addresses the course requirement that all projects support basic uploading,
 2. Browse available events.
 3. Click an event to open the event detail page.
 
-**Suggested screenshot:**  
-`[TODO: insert screenshot path for public event list]`
+**Public Event List**
+
+<img src="Screenshots/event_list.png" width="450" />
 
 ### 6.2 Attendee Flow
 
@@ -195,11 +196,11 @@ This addresses the course requirement that all projects support basic uploading,
 
 **Staff Assignment page**
 
-<img src="Screenshots/staff_assignment.png" width="400" />
+<img src="Screenshots/staff_assignment.png" width="450" />
 
 **Organizer Dashboard**
 
-<img src="Screenshots/live_dashboard.png" width="400" />
+<img src="Screenshots/live_dashboard.png" width="450" />
 
 ### 6.4 Staff Flow
 
@@ -231,10 +232,12 @@ This addresses the course requirement that all projects support basic uploading,
 5. The poster can be downloaded through the stored file reference.
 
 **Poster Upload Form**
+
 <img src="Screenshots/Poster_upload_form.png" width="400" />
 
 **Poster Display and Download Display**
-<img src="Screenshots/Poster_display_and_download.png" width="400" />
+
+<img src="Screenshots/Poster_display_and_download.png" width="300" />
 
 ---
 
