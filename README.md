@@ -230,134 +230,232 @@ This addresses the course requirement that all projects support basic uploading,
 4. Event detail page displays the uploaded poster.
 5. The poster can be downloaded through the stored file reference.
 
-**Suggested screenshots:**  
-- `[TODO: poster upload form]`
-- `[TODO: event detail page showing poster]`
+**Poster Upload Form**
+<img src="Screenshots/Poster_upload_form.png" width="400" />
+
+**Poster Display and Download Display**
+<img src="Screenshots/Poster_display_and_download.png" width="400" />
 
 ---
 
 ## 7. Development Guide
 
-### 7.1 Environment Setup
+### 7.1 Prerequisites
 
-Prerequisites:
-- Node.js 18+
-- PostgreSQL
-- `[TODO: local S3-compatible storage service if used]`
-- npm
+- **Node.js 18+** and **npm**
+- **PostgreSQL 16** (installed locally or via the bundled Docker Compose file)
+- **MinIO** (or another S3-compatible service) for event poster upload and download
 
-Clone the repository and install dependencies:
+### 7.2 Clone and Install
 
 ```bash
-git clone [TODO: repo-url]
+git clone git@github.com:jassiyu/ECE1724-2026S-Web-Project.git
 cd ECE1724-2026S-Web-Project
 ```
 
-Backend:
+Install dependencies for both backend and frontend:
 
 ```bash
 cd backend
 npm install
-```
 
-Frontend:
-
-```bash
 cd ../frontend
 npm install
 ```
 
-### 7.2 Backend Configuration
+### 7.3 Database Setup
 
-Create `backend/.env` and configure the required variables.
-
-Example:
-
-```env
-DATABASE_URL=[TODO]
-JWT_SECRET=[TODO]
-S3_ENDPOINT=[TODO]
-S3_BUCKET=[TODO]
-S3_ACCESS_KEY=[TODO]
-S3_SECRET_KEY=[TODO]
-S3_REGION=[TODO]
-```
-
-`[TODO: update variable names so they match your real backend config]`
-
-### 7.3 Database Initialization
-
-From the backend directory:
+The repository includes a `docker-compose.yml` that starts a PostgreSQL 16 instance:
 
 ```bash
+docker compose up -d
+```
+
+This creates a database named `ticketing` with user `dev` and password `dev`, accessible at `localhost:5432`. If you prefer to use an existing PostgreSQL installation, create the database manually and adjust `DATABASE_URL` in the next step.
+
+Once the database is running, generate the Prisma client and apply migrations:
+
+```bash
+cd backend
 npx prisma generate
 npx prisma migrate dev
 ```
 
-Optional reset for a clean local database:
+To inspect the database interactively:
+
+```bash
+npx prisma studio
+```
+
+To reset the database to a clean state (drops all data and re-applies migrations):
 
 ```bash
 npx prisma migrate reset
 ```
 
-### 7.4 Cloud Storage Configuration
+### 7.4 Backend Configuration
 
-To enable poster upload and retrieval:
-- start the S3-compatible storage service
-- create the bucket configured in the backend environment
-- ensure the backend can generate pre-signed upload URLs
-- ensure the storage service allows local development access as needed
-
-`[TODO: add concrete local instructions if you used MinIO or another local storage service]`
-
-### 7.5 Run the Project Locally
-
-Backend:
+Copy the example environment file and edit as needed:
 
 ```bash
 cd backend
-npm run dev
+cp .env.example .env
 ```
 
-Frontend:
+The `.env.example` contains the following variables with sensible local defaults:
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_URL` | `postgresql://dev:dev@localhost:5432/ticketing` | PostgreSQL connection string (matches Docker Compose) |
+| `JWT_SECRET` | `change-me-in-production` | Secret used to sign and verify JWT tokens |
+| `JWT_EXPIRES_IN` | `7d` | JWT token expiration period |
+| `PORT` | `3000` | Port the Express server listens on |
+| `S3_ENDPOINT` | `http://localhost:9000` | S3-compatible endpoint (MinIO for local dev) |
+| `S3_REGION` | `us-east-1` | S3 region |
+| `S3_BUCKET` | `ticketing-assets` | Bucket name for poster file storage |
+| `S3_ACCESS_KEY` | `minioadmin` | S3 access key (MinIO default) |
+| `S3_SECRET_KEY` | `minioadmin` | S3 secret key (MinIO default) |
+
+An optional variable `FRONTEND_URL` (default `http://localhost:5173`) controls the Socket.IO CORS origin. It does not need to be set during local development.
+
+### 7.5 Cloud Storage Setup (Poster Upload)
+
+Event poster upload and download rely on **presigned S3 URLs**. The backend generates a presigned `PUT` URL; the browser uploads the file directly to S3-compatible storage. Accepted MIME types are `image/png`, `image/jpeg`, and `application/pdf`, with a maximum size of **10 MiB**. File metadata is stored in the `FileObject` table and linked to the event record via `posterFileId`.
+
+For local development, use **MinIO** as the S3-compatible storage backend.
+
+**1. Start MinIO**
+
+The simplest method is Docker:
 
 ```bash
-cd frontend
+docker run -d --name minio \
+  -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=minioadmin \
+  -e MINIO_ROOT_PASSWORD=minioadmin \
+  quay.io/minio/minio server /data --console-address ":9001"
+```
+
+The S3 API is available at `http://localhost:9000` and the MinIO Console at `http://localhost:9001`.
+
+**2. Create the bucket**
+
+Open the MinIO Console (`http://localhost:9001`, login `minioadmin` / `minioadmin`), and create a bucket named `ticketing-assets` (matching `S3_BUCKET` in `.env`).
+
+Alternatively, use the MinIO client CLI:
+
+```bash
+mc alias set local http://localhost:9000 minioadmin minioadmin
+mc mb local/ticketing-assets
+```
+
+**3. Configure CORS on the bucket**
+
+The browser performs a direct `PUT` to the presigned URL, so the bucket must allow cross-origin requests from the frontend origin. In the MinIO Console, navigate to **Buckets → ticketing-assets → Access Rules** and add a CORS rule allowing:
+
+- **Origin:** `http://localhost:5173`
+- **Methods:** `PUT`, `GET`
+- **Headers:** `Content-Type`
+
+Without this CORS rule, poster uploads from the browser will fail.
+
+### 7.6 Running the Project Locally
+
+Start the backend (from the `backend` directory):
+
+```bash
 npm run dev
 ```
 
-Expected local URLs:
-- frontend: `http://localhost:5173`
-- backend: `http://localhost:3000`
-- backend health route: `http://localhost:3000/health`
+Start the frontend in a separate terminal (from the `frontend` directory):
 
-### 7.6 Testing and Verification
+```bash
+npm run dev
+```
 
-Our team verified correctness mainly through end-to-end user-flow testing across all three roles.
+The Vite dev server proxies `/api/*` requests to the backend (stripping the `/api` prefix) and forwards `/socket.io` traffic with WebSocket support.
 
-The main tested flow was:
-1. organizer creates an event
-2. organizer adds a ticket type
-3. organizer assigns staff
-4. attendee claims a ticket
-5. attendee views ticket detail and QR token
-6. staff validates the ticket
-7. organizer dashboard updates in real time
+| Service | URL |
+|---|---|
+| Frontend | `http://localhost:5173` |
+| Backend API | `http://localhost:3000` |
+| Health check | `http://localhost:3000/health` → `{"status":"ok"}` |
+| MinIO Console | `http://localhost:9001` |
 
-We also manually verified:
-- duplicate scan behavior
-- invalid token behavior
-- route and API protection for unauthorized roles
-- staff assignment restrictions for event-specific actions
+### 7.7 Testing and Verification
 
-`[TODO: add test commands if you have frontend vitest tests or backend tests]`
-
-Example frontend test command:
+The frontend includes a Vitest test suite covering presigned upload API calls and Socket.IO helper functions:
 
 ```bash
 cd frontend
 npm test
 ```
+
+For continuous test watching during development:
+
+```bash
+npm run test:watch
+```
+
+Linting:
+
+```bash
+npm run lint
+```
+
+Beyond automated tests, our team verified correctness through end-to-end user-flow testing across all three roles. The main tested flow was:
+
+1. Organizer creates an event and uploads a poster
+2. Organizer adds a ticket type
+3. Organizer assigns staff
+4. Attendee claims a ticket
+5. Attendee views ticket detail and QR token
+6. Staff validates the ticket (camera scan and manual token entry)
+7. Organizer dashboard updates in real time
+
+We also manually verified:
+- duplicate scan returns `already_used`
+- invalid or wrong-event tokens return the correct error status
+- route and API protection for unauthorized roles
+- staff assignment restrictions for event-specific actions
+- poster upload failure displays an error message in the UI
+
+### 7.8 Deployment Information
+
+The repository does not include a pre-built deployment configuration (no Dockerfile for the application, no Vercel/Netlify manifests). For production deployment, the following steps apply.
+
+**Build the backend:**
+
+```bash
+cd backend
+npm run build
+```
+
+This compiles TypeScript to `backend/dist/`. The production entry point is:
+
+```bash
+node dist/server.js
+```
+
+The server port is controlled by the `PORT` environment variable.
+
+**Build the frontend:**
+
+```bash
+cd frontend
+npm run build
+```
+
+This produces a static SPA bundle in `frontend/dist/`. The built frontend can be served by any static hosting service or a reverse proxy such as Nginx.
+
+**Production environment considerations:**
+
+- Set `JWT_SECRET` to a strong, unique secret.
+- Set `DATABASE_URL` to the production PostgreSQL connection string.
+- Configure `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, and `S3_REGION` for the production S3-compatible storage provider (e.g., AWS S3, DigitalOcean Spaces, or a self-hosted MinIO instance). The `S3_ENDPOINT` variable can be omitted when using standard AWS S3, as the SDK defaults to the official endpoint based on region.
+- Set `FRONTEND_URL` to the production frontend origin so that Socket.IO CORS accepts connections from the correct domain.
+- The frontend REST API calls use a relative base URL (`/api`). In production, a reverse proxy must rewrite `/api/*` to the backend (stripping the `/api` prefix), matching the same pattern used by the Vite dev proxy. The `/socket.io` path must also be forwarded with WebSocket upgrade support.
+- If no `VITE_SOCKET_URL`, `VITE_API_BASE_URL`, or `VITE_BACKEND_URL` environment variable is set at build time, the frontend Socket.IO client defaults to `window.location.origin` in production builds, which works correctly when the frontend and backend share the same domain behind a reverse proxy.
 
 ---
 
