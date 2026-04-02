@@ -388,66 +388,43 @@ npm test
 
 ## 8. AI Assistance & Verification (Summary)
 
-AI tools were used as development support tools rather than as a source of unverified final answers. The main areas where AI contributed were:
-- architecture and scope clarification
-- debugging frontend and backend integration issues
-- route and API naming consistency
-- documentation drafting and cleanup
-- edge-case discussion for scanner and validation logic
+AI tools were used as bounded development aids for ideation, debugging, and documentation rather than as an authoritative source of final code. Across the project, we used AI primarily to compare QR-scanning approaches, reason about Socket.IO room updates, review route and API naming consistency, and improve documentation clarity. In practice, AI outputs were treated as hypotheses: we only kept suggestions that matched our actual React + TypeScript + Express + Prisma stack and fit the architecture already established in TicketGate.
 
-One representative limitation was that AI sometimes suggested code or library usage that did not match our actual environment or dependency versions. For example, some scanner-library suggestions conflicted with our React version and had to be rejected or replaced after verification.
+AI was most useful when we needed to turn a vague problem into a concrete debugging path. It helped us shortlist browser-based QR scanning options, outline a presigned-upload workflow for S3-compatible storage, and think through room-based real-time updates for the organizer dashboard. It also helped surface edge cases that deserved explicit handling, such as duplicate scans, wrong-event scans, unauthorized event access, sold-out ticket types, and failure states during upload or validation.
 
-We verified correctness through:
-- manual end-to-end testing across Organizer, Staff, and Attendee flows
-- checking logs and API behavior during debugging
-- validating role-based access restrictions
-- checking dashboard updates against persisted check-in results
-- running the available frontend tests and local integration checks
+At the same time, AI suggestions were not always directly usable. Some recommendations assumed libraries, examples, or patterns that did not match our dependency versions or project structure. This was most noticeable in QR-scanner suggestions, where some proposed React wrappers were not a good fit for our frontend environment. In other cases, AI responses were too generic, such as suggesting broader real-time broadcasts when our application required event-specific authorization and room-based updates.
 
-See **`ai-session.md`** for concrete examples of AI usage, mistakes, and follow-up verification.
+Because of this, verification was a required step before adoption. We checked proposed changes against package versions, our existing type definitions, backend contracts, and actual runtime behavior. Accepted suggestions were verified through manual end-to-end testing across Organizer, Staff, and Attendee flows, inspection of backend logs and API responses, validation of role-based access restrictions, observation of real-time dashboard updates after persisted check-ins, and the available frontend tests for advanced features such as presigned uploads and Socket.IO helpers. Only suggestions that passed these checks were incorporated into the final project. Representative examples are documented in `ai-session.md`.
 
 ---
 
 ## 9. Individual Contributions
 
-### Ruifan Wu
-- Led the backend foundation and core integration work.
-- Implemented authentication and authorization support, including backend middleware for protected access control.
-- Built core backend support for event-related APIs and services, including event CRUD and organizer-facing backend logic.
-- Helped maintain consistent backend structure, endpoint behavior, and integration across modules.
+The project was completed collaboratively, but each team member had a primary area of ownership that helped reduce merge conflicts and keep development parallelized.
 
-### Yuye Huang
-- Focused on the ticket and check-in workflow.
-- Implemented ticket claim logic and attendee-side ticket pages, including My Tickets and ticket detail display.
-- Built the validation flow for scanner results, including support for success, already used, invalid ticket, wrong event, and cancelled states.
-- Helped test and verify the end-to-end ticket lifecycle and duplicate-prevention behavior.
+**Ruifan Wu** primarily led the backend foundation and access-control layer. This included the authentication flow, JWT-based protection, role-aware middleware, and core event-related backend logic. Ruifan also helped establish the backend service/resource/client structure and supported integration across modules so that the event, dashboard, and staff-management flows behaved consistently.
 
-### Jenny You
-- Focused on advanced features and organizer-side operational tools.
-- Implemented real-time functionality for the live dashboard using Socket.IO.
-- Worked on file-handling support and event asset integration, including poster-related storage flow.
-- Built organizer-facing staff assignment and dashboard functionality, and contributed to ticket-type and organizer operations support.
-- Helped maintain API documentation and final QA and integration checks.
+**Yuye Huang** primarily led the ticket lifecycle and check-in workflow. This included ticket claiming, attendee ticket views, scanner validation logic, and the handling of validation states such as `success`, `already_used`, `wrong_event`, `cancelled`, and `invalid_ticket`. Yuye also contributed to testing the end-to-end ticket path from claim to scan and helped refine duplicate-prevention behavior.
 
-### Jasmine Shao
-- Built the frontend shell, routing structure, and shared client-side setup.
-- Implemented login/register flow integration, protected routes, and the main organizer and public event pages.
-- Worked on the core event-related frontend experience, including event list, event detail, create event, and edit event pages.
-- Contributed to later frontend polish and integration work, including scanner-page improvements, ticket-type management flow updates, and role-based page consistency.
+**Jenny You** primarily led the advanced features and organizer-side operational tooling. This included Socket.IO-based real-time dashboard updates, file-handling support for poster uploads using S3-compatible storage, and organizer-facing operational pages such as staff assignment and dashboard-related functionality. Jenny also supported integration work around ticket-type operations, final QA passes, and documentation cleanup.
 
-`[TODO: adjust if needed]`
+**Jasmine Shao** primarily led the frontend shell and the main user-facing page structure. This included routing, login and registration flow integration, protected-page behavior, and the core event pages such as the public event list, event detail, create event, and edit event views. Jasmine also contributed to later frontend integration and polish, including consistency fixes across role-based flows and improvements to the usability of event-management pages.
+
+Although responsibilities were divided by feature area, final integration, bug fixing, and verification were shared across the whole team. All members contributed to debugging cross-layer issues between frontend, backend, database, and real-time behavior.
 
 ---
 
 ## 10. Lessons Learned and Concluding Remarks
 
-This project helped us understand how much coordination is required to build even a focused full-stack system with multiple user roles. A workflow that appears simple from the outside—create event, claim ticket, check in attendee—requires many connected parts behind the scenes: relational modeling, route protection, event-specific permissions, frontend state handling, real-time updates, and file integration.
+This project showed us that even a focused full-stack application becomes substantially more complex once it includes multiple user roles, authorization rules, and cross-feature dependencies. A workflow that looks simple at the surface—create an event, claim a ticket, scan a QR code, and update attendance—depends on many tightly connected components behind the scenes: relational data modeling, route protection, event-specific permissions, frontend state coordination, direct-to-storage file handling, and real-time communication.
 
-One major lesson was that keeping the scope focused was important. Our proposal intentionally kept payments, waitlists, advanced analytics, and other larger features out of the MVP so that we could first deliver a stable end-to-end workflow. That decision helped us prioritize the most important path: event creation, ticket issuance, validation, and dashboard updates.
+One of the most important lessons was the value of scope control. Early in the project, it was tempting to add features such as payments, discount codes, waitlists, email notifications, and richer analytics. However, keeping the MVP centered on the core lifecycle allowed us to produce a working system with a clear and testable value proposition. That decision made it easier to prioritize stability in the most important path: event creation, ticket-type setup, ticket claiming, validation at entry, and live dashboard updates.
 
-We also learned that backend authorization must remain the real source of truth, especially for event-specific actions such as dashboard access and ticket validation. Another practical lesson was that real-time features and camera-based scanning are often less difficult in theory than in browser and device behavior, so stable fallback behavior matters.
+We also learned that authorization logic must remain a backend responsibility rather than a frontend assumption. Pages can hide buttons or routes, but the real source of truth must be server-side checks tied to the authenticated user and the target event. This became especially important for dashboard access, staff assignment, and ticket validation, where event-level ownership and assignment rules had to be enforced consistently.
 
-Overall, TicketGate achieved the main goals set out in our proposal: a separate React + Express architecture, role-based access control, ticket lifecycle support, event-specific validation, and real-time attendance visibility.
+Another practical lesson was that features that seem straightforward in concept can become sensitive to environment details in implementation. Camera-based QR scanning depends on browser behavior, device support, and library compatibility. Real-time updates depend on room membership, event naming, and predictable state synchronization. File uploads depend on storage configuration, MIME restrictions, and correct database association. In each case, providing stable fallback behavior and keeping the architecture simple were more valuable than chasing unnecessary complexity.
+
+Overall, TicketGate achieved the main goals we set for the project: a separate React and Express architecture, role-based access control, a complete ticket lifecycle, event-specific validation and duplicate prevention, poster upload support, and real-time attendance visibility for authorized users. More importantly, the project gave us hands-on experience in turning a realistic operational problem into a working full-stack system. If we continued the project beyond the course, the next logical directions would be payment support, attendee notifications, stronger automated testing, and more advanced organizer analytics.
 
 ---
 
