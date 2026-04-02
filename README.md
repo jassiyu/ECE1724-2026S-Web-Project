@@ -15,89 +15,34 @@ TicketGate is a full-stack web application for event ticketing and QR-based chec
 
 ## 2. Motivation
 
-We chose TicketGate because event entry is a familiar real-world workflow that still breaks down easily when handled with forms, spreadsheets, and manual check-in. That approach may be acceptable while attendance is small, but it becomes unreliable during peak arrival time, when staff need to search names manually, resolve conflicts at the door, and update attendance after the fact. In practice, this can create long lines, duplicate entry, unclear ticket status, and poor visibility for organizers exactly when they need fast decisions.
+TicketGate was developed to address a common operational weakness in small- to medium-scale event management: the dependence on manual registration lists, spreadsheets, and informal check-in procedures during periods of peak attendee arrival. While such methods may be workable for low-volume events, they become unreliable when organizers must confirm ticket validity quickly, resolve registration disputes at the door, and maintain an accurate count of attendees in real time. In these conditions, delays, duplicate entry, inconsistent records, and limited situational awareness can significantly reduce the quality and reliability of event operations.
 
-The problem is significant because check-in is the most time-sensitive part of an in-person event. A reliable ticketing and validation system improves the experience for every role involved. Organizers need visibility into capacity, ticket usage, and staff operations. Staff need a fast and unambiguous way to validate entry. Attendees need a simple ticket flow that reduces confusion and waiting time. A QR-based workflow with server-side validation directly addresses that operational bottleneck.
+Our team selected this project because it represents a practical engineering problem with clear real-world value and well-defined technical challenges. A QR-based ticketing and check-in platform offers a direct improvement over manual workflows by enabling faster entry, clearer validation outcomes, and immediate visibility into attendance status. This benefits all primary stakeholders: organizers gain stronger control over event operations and reporting, staff receive a simple and unambiguous validation workflow, and attendees experience a more efficient and less error-prone entry process.
 
-This project was also a strong match for the course because the problem naturally requires the major skills we wanted to practice in one integrated system: authenticated role-based access, relational data modeling, secure API design, cloud-style file handling, and real-time updates. The spreadsheet-error literature also supports the motivation for moving beyond manual workflows, since spreadsheet-based processes are known to be error-prone in operational settings.[1][2]
-
-### Target Users
-
-- **Organizer**: creates and manages events, configures ticket types, assigns staff, monitors attendance, and manages event assets.
-- **Staff**: validates tickets for assigned events and handles duplicate or invalid scans.
-- **Attendee**: claims tickets and presents a QR code or token at entry.
-
-### Existing Solutions and Their Limitations
-
-1. **DIY spreadsheets**: easy to start with, but error-prone and difficult to use reliably in real time.[1][2]
-2. **Commercial ticketing platforms**: they validate the usefulness of QR-based tickets and organizer scanning apps, but they may be less attractive for small organizers because of fees and limited customization.[3][4]
-3. **Static QR generators or printable lists**: easy to create, but without server-side validation they cannot reliably prevent reuse or duplicate entry.[5]
+The project was also well aligned with the learning objectives of the course. Implementing TicketGate required the integration of several core full-stack engineering concepts within a single system, including authenticated multi-role access control, relational data modeling, secure API design, file upload and retrieval, and real-time communication between clients and the server. Rather than building an abstract demonstration, the team aimed to produce a cohesive application centered on a realistic operational workflow with clear functional requirements and measurable outcomes. The spreadsheet-error literature further supports the decision to move beyond manual spreadsheet-based operations, while current commercial ticketing platforms and anti-fraud guidance reinforce the value of QR-based validation with server-side checking [1], [2]. Commercial platforms demonstrate that this workflow is effective in practice, but they may be less attractive to smaller organizers because of fees and limited customization [3], [4]. Likewise, fraud-prevention guidance highlights the importance of database-backed validation and duplicate detection rather than static QR lists alone [5].
 
 ---
 
 ## 3. Objectives
 
-The main objective of TicketGate was to implement a complete and testable event workflow:
+The primary objective of TicketGate was to design and implement a complete, end-to-end event ticketing workflow that supports the major roles involved in event operations: Organizer, Staff, and Attendee. The intended workflow begins with event creation and ticket-type configuration, continues through ticket claiming and QR-code issuance, and concludes with ticket validation, duplicate prevention, and live attendance monitoring during check-in.
 
-**create event → configure ticket types → assign staff → claim ticket → generate QR/token → validate at entry → record check-in → update the organizer dashboard**
+To achieve this objective, the team defined several concrete implementation goals for the minimum viable product. First, the system needed to enforce authenticated and role-aware access so that each user could only perform actions appropriate to their responsibilities. Second, organizers needed tools to create and manage events, configure ticket types, assign staff, and monitor attendance. Third, attendees needed a clear flow for claiming tickets and retrieving them later through a persistent “My Tickets” interface. Finally, staff required a reliable validation interface capable of distinguishing successful scans from invalid, duplicate, cancelled, or wrong-event tickets.
 
-To achieve that goal, we defined the following concrete objectives for the MVP:
-
-- support authenticated access for three roles: Organizer, Staff, and Attendee
-- allow organizers to create, edit, and manage events and ticket types
-- allow attendees to claim tickets and retrieve them later through **My Tickets**
-- generate a unique opaque token for each ticket so that validation does not depend on guessable identifiers
-- enforce one-time ticket use and clearly handle duplicate, invalid, cancelled, and wrong-event scans
-- provide organizers with live attendance visibility through Socket.IO-based dashboard updates
-- support poster upload and download through S3-compatible object storage and database-linked file metadata
-- keep the codebase modular enough that routing, business logic, persistence, and real-time features remain easy to reason about
-
-We intentionally kept payments, discount codes, email notifications, waitlists, and advanced analytics out of scope. That decision let us focus on delivering a stable core lifecycle first, which was the most important measure of success for the project.
+A further objective was to ensure that the system architecture remained modular and maintainable. The project was therefore structured so that routing, business logic, persistence, authentication, file handling, and real-time communication were separated into clear layers. This was intended not only to support correctness and easier debugging during development, but also to make the application extensible for future enhancements such as payments, notifications, analytics, or more advanced event-management features. At the same time, the team deliberately kept those features out of scope in order to prioritize stability and correctness in the core ticket lifecycle.
 
 ---
 
 ## 4. Technical Stack
 
-We chose the **Express.js Backend** path rather than the Next.js full-stack path. The application benefits from a clear separation between the browser client, the REST API, the database layer, and the real-time Socket.IO server, especially because the system has multiple roles, event-specific authorization rules, and direct-to-storage file-upload flows.
+TicketGate was implemented using a separated frontend-backend architecture based on the Express.js backend option. This design was chosen to provide a clean division of responsibilities between user interface concerns, API logic, persistent data storage, and real-time event updates. The resulting architecture more closely reflects a production-style web system and was particularly suitable for a project with multiple user roles, event-specific authorization rules, and direct file-upload workflows.
 
-Our implementation therefore follows a **separate frontend and backend architecture**.
+On the frontend, the application uses React 19 with TypeScript to provide a typed, component-based user interface. Vite is used for development and build tooling, while React Router supports page routing and protected navigation. Shared client-side state is managed with Redux Toolkit, and Axios is used for communication with the backend API. For styling, the project uses Tailwind CSS v4. Real-time updates on organizer dashboards are delivered through the Socket.IO client, and staff-side QR scanning is supported using `@zxing/browser`, with manual token entry retained as a fallback for robustness.
 
-### Frontend
+On the backend, the system is built with Express.js and TypeScript. Persistent application data is managed through PostgreSQL, accessed using Prisma ORM for typed schema-driven development. Authentication is implemented using JWT, with `bcryptjs` used for password hashing and Zod used for request validation. Real-time communication is handled through Socket.IO, allowing authorized users to receive event-specific dashboard updates without refreshing the page.
 
-- React 19 with TypeScript for a typed component-based UI
-- Vite for local development and frontend builds
-- React Router for page routing and protected navigation
-- Redux Toolkit for shared auth, event, and scanner state
-- Axios for HTTP communication with the backend API
-- Socket.IO client for real-time dashboard updates
-- `@zxing/browser` for camera-based QR scanning
-- Tailwind CSS v4 for styling
+For storage and deployment-related infrastructure, the project uses S3-compatible object storage for event poster uploads and downloads, integrated through AWS SDK v3 and presigned upload/download URLs. In local development, this storage flow can be backed by a MinIO-compatible endpoint. Development setup requires Node.js 18+ and PostgreSQL, and the local environment uses separate frontend and backend services, with the frontend proxying API and Socket.IO traffic to the backend. This stack allowed the team to implement authenticated APIs, relational persistence, cloud-style file handling, and live operational updates within one coherent full-stack application.
 
-### Backend
-
-- Express.js with TypeScript for the REST API
-- Prisma ORM for typed database access and schema-driven development
-- JWT-based authentication, role-aware authorization checks, and `bcryptjs` password hashing
-- Zod for request validation
-- Socket.IO for authorized real-time event-room updates
-
-### Database and Storage
-
-- PostgreSQL as the primary relational database for users, events, ticket types, tickets, check-ins, staff assignments, and file metadata
-- Docker Compose with PostgreSQL 16 for local database setup
-- S3-compatible object storage for event poster uploads and downloads
-- AWS SDK v3 with pre-signed upload/download URLs for direct file transfer
-- MinIO-compatible local development configuration through `S3_ENDPOINT=http://localhost:9000`
-
-### Architectural Approach
-
-The backend uses a three-layer structure:
-
-- **Resources / routes** for HTTP endpoints
-- **Services** for application logic
-- **Clients** for database and storage access
-
-On the frontend, we similarly separated pages, API helpers, store slices, and socket helpers. This structure kept the codebase easier to debug, made role-based behavior more explicit, and reduced coupling between UI code and backend-specific details.
 
 ---
 
