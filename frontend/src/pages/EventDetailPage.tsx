@@ -146,6 +146,14 @@ export default function EventDetailPage() {
                     alt={`${event.title} poster`}
                     className="h-64 w-full object-cover"
                   />
+                  <div className="flex justify-end px-4 py-2">
+                    <a
+                      href={filesApi.getAttachmentUrl(event.posterFileId)}
+                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                    >
+                      Download Poster
+                    </a>
+                  </div>
                 </div>
               )}
 

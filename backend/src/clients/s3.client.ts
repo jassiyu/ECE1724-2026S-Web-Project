@@ -15,7 +15,8 @@ export interface IS3Client {
 
   getPresignedDownloadUrl(
     bucketKey: string,
-    expiresIn?: number
+    expiresIn?: number,
+    fileName?: string
   ): Promise<string>;
 
   deleteObject(bucketKey: string): Promise<void>;
@@ -61,11 +62,15 @@ export class S3Client implements IS3Client {
 
   async getPresignedDownloadUrl(
     bucketKey: string,
-    expiresIn = 900
+    expiresIn = 900,
+    fileName?: string
   ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: requireBucketName(),
       Key: bucketKey,
+      ...(fileName && {
+        ResponseContentDisposition: `attachment; filename="${fileName.replace(/["\\\r\n]/g, "_")}"`,
+      }),
     });
 
     return getSignedUrl(awsS3Client, command, { expiresIn });

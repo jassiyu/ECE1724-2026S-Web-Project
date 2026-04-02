@@ -31,7 +31,8 @@ router.get(
         throw AppError.badRequest("Missing fileId");
       }
 
-      const url = await fileService.getDownloadUrl(fileId);
+      const attachment = req.query.attachment === "true";
+      const url = await fileService.getDownloadUrl(fileId, attachment);
       res.redirect(url);
     } catch (err) {
       next(err);
