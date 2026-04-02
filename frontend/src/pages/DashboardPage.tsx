@@ -218,7 +218,7 @@ export default function DashboardPage() {
     capacity > 0 ? Math.min(100, Math.round((checkedInCount / capacity) * 100)) : 0;
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-10">
+    <div className="mx-auto w-full max-w-5xl px-6 py-10" data-demo="dashboard-page">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Live Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -249,7 +249,10 @@ export default function DashboardPage() {
           <section className="grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <p className="text-sm text-gray-500">Checked In</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
+              <p
+                className="mt-2 text-3xl font-bold text-gray-900"
+                data-demo="dashboard-checked-in-count"
+              >
                 {dashboard.checkedInCount}
               </p>
             </div>
@@ -265,7 +268,10 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <section
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+            data-demo="dashboard-occupancy"
+          >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-medium text-gray-700">Occupancy</p>
               <p className="text-sm text-gray-500">{occupancyPercent}%</p>
@@ -278,7 +284,10 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <section
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+            data-demo="dashboard-recent-feed"
+          >
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Recent Scan Feed</h2>
               <p className="text-sm text-gray-500">

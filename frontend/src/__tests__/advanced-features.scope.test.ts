@@ -90,9 +90,10 @@ describe("Advanced feature frontend tests", () => {
       connectSocket("token-1");
 
       expect(ioMock).toHaveBeenCalledWith(
-        "/",
+        "http://localhost:3000",
         expect.objectContaining({
           auth: { token: "token-1" },
+          path: "/socket.io",
           transports: ["websocket"],
         })
       );
@@ -115,6 +116,31 @@ describe("Advanced feature frontend tests", () => {
 
       expect(fakeSocket.emit).toHaveBeenNthCalledWith(1, "join:event", "event-1");
       expect(fakeSocket.emit).toHaveBeenNthCalledWith(2, "leave:event", "event-1");
+    });
+
+    it("rejoins subscribed event rooms after reconnect", () => {
+      const handlers = new Map<string, () => void>();
+      const fakeSocket = {
+        connected: false,
+        connect: vi.fn(),
+        disconnect: vi.fn(),
+        emit: vi.fn(),
+        on: vi.fn((event: string, callback: () => void) => {
+          handlers.set(event, callback);
+        }),
+        off: vi.fn(),
+      };
+      ioMock.mockReturnValue(fakeSocket);
+
+      connectSocket("token-2");
+      joinEventRoom("event-1");
+
+      expect(fakeSocket.emit).not.toHaveBeenCalled();
+
+      fakeSocket.connected = true;
+      handlers.get("connect")?.();
+
+      expect(fakeSocket.emit).toHaveBeenCalledWith("join:event", "event-1");
     });
 
     it("registers and unregisters realtime listeners", () => {
