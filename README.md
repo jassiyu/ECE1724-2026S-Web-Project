@@ -60,7 +60,7 @@ Examples:
 - only attendees can claim tickets and view **My Tickets**
 - only assigned staff can validate tickets for a specific event
 
-This fulfills one of our planned advanced features: role-based authentication and authorization.
+This feature provides role-based authentication and authorization across the system and protects both frontend routes and backend APIs.
 
 ### 5.2 Event Management
 
@@ -73,7 +73,7 @@ Organizers can create and edit events with:
 - capacity
 - poster file reference
 
-This satisfies the core event management requirement in our proposal and forms the base of the organizer workflow.
+This supports the organizer-side event lifecycle and provides the core event CRUD functionality required by the system.
 
 ### 5.3 Ticket Type Management
 
@@ -84,13 +84,13 @@ Organizers can create ticket types for an event, including:
 - sales start time
 - sales end time
 
-This supports the organizer-side setup flow and makes event configuration possible before ticket claiming begins.
+This supports the organizer-side setup flow by allowing ticket configuration before attendees claim tickets.
 
 ### 5.4 Ticket Claiming and QR / Token Issuance
 
 Attendees can claim a ticket from the event detail page. After claiming, the ticket appears in **My Tickets**, and the ticket detail page shows the ticket information and QR/token content.
 
-As planned in our MVP, the current implementation uses a free-claim model rather than full payment processing. Payment and refund flows were intentionally kept out of scope to keep the main event lifecycle stable.
+The current implementation uses a free-claim model rather than full payment processing. Payment and refund flows were intentionally kept out of scope to keep the main event lifecycle stable. Ticket QR/token values are validated server-side during check-in to support secure one-time entry.
 
 ### 5.5 Ticket Validation and Duplicate Prevention
 
@@ -107,13 +107,13 @@ The validation result clearly distinguishes among:
 - `cancelled`
 - `invalid_ticket`
 
-This implements the core check-in validation workflow and duplicate prevention behavior described in our proposal.
+This feature enforces one-time ticket validation and prevents duplicate entry during event check-in.
 
 ### 5.6 Scanner Page with Camera and Manual Fallback
 
 The staff scanner page supports both manual token entry and camera-based QR scanning. We kept manual input as a fallback so that the same backend validation logic still works even if camera scanning is unavailable on a specific device.
 
-This improves usability while keeping the validation flow reliable during demos and local testing.
+This improves staff-side usability by supporting both direct scanning and manual fallback input while reusing the same validation workflow.
 
 ### 5.7 Live Dashboard
 
@@ -124,7 +124,7 @@ The organizer dashboard displays:
 - occupancy percentage
 - recent scan feed
 
-New check-ins and duplicate or invalid scan events are pushed in real time using Socket.IO. This fulfills our second advanced feature: real-time functionality.
+New check-ins and duplicate or invalid scan events are pushed in real time using Socket.IO. This gives organizers live operational visibility during check-in without requiring manual page refresh.
 
 ### 5.8 Staff Assignment
 
@@ -159,10 +159,17 @@ This addresses the course requirement that all projects support basic uploading,
 4. After claiming, go to **My Tickets**.
 5. Open the ticket detail page to view the ticket and QR/token.
 
-**Suggested screenshots:**  
-- `[TODO: attendee event detail page]`
-- `[TODO: My Tickets page]`
-- `[TODO: ticket detail page with QR/token]`
+**Event Detail page**
+
+<img src="Screenshots/event_details.png" width="400" />
+
+**My Tickets page**
+
+<img src="Screenshots/my_tickets.png" width="400" />
+
+**Ticket Detail page**
+
+<img src="Screenshots/ticket_details.png" width="400" />
 
 ### 6.3 Organizer Flow
 
@@ -174,12 +181,25 @@ This addresses the course requirement that all projects support basic uploading,
 6. Assign staff members to the event by email.
 7. Open the live dashboard to monitor attendance.
 
-**Suggested screenshots:**  
-- `[TODO: create event page]`
-- `[TODO: edit event page]`
-- `[TODO: add ticket type page]`
-- `[TODO: staff assignment page]`
-- `[TODO: organizer dashboard]`
+**Create Event page**
+
+<img src="Screenshots/create_event.png" width="400" />
+
+**Edit Event page**
+
+<img src="Screenshots/edit_event.png" width="400" />
+
+**Add Ticket type page**
+
+<img src="Screenshots/add_ticket_type.png" width="400" />
+
+**Staff Assignment page**
+
+<img src="Screenshots/staff_assignment.png" width="400" />
+
+**Organizer Dashboard**
+
+<img src="Screenshots/live_dashboard.png" width="400" />
 
 ### 6.4 Staff Flow
 
@@ -190,10 +210,17 @@ This addresses the course requirement that all projects support basic uploading,
    - paste or type the ticket token manually
 4. The page will display one of the validation results, such as VALID or ALREADY USED.
 
-**Suggested screenshots:**  
-- `[TODO: scanner page]`
-- `[TODO: scanner VALID result]`
-- `[TODO: scanner ALREADY USED result]`
+**Scanner page**
+
+<img src="Screenshots/scan_page.png" width="400" />
+
+**Scanner VALID result**
+
+<img src="Screenshots/valid_scan.png" width="400" />
+
+**Scanner ALREADY USED result**
+
+<img src="Screenshots/used_scan.png" width="400" />
 
 ### 6.5 Poster Flow
 
