@@ -15,11 +15,11 @@ TicketGate is a full-stack web application for event ticketing and QR-based chec
 
 ## 2. Motivation
 
-Small event organizers such as student clubs, hobby groups, and campus communities often still rely on Google Forms, spreadsheets, and manual check-in. This workflow becomes fragile at the exact moment reliability matters most: peak arrivals. Staff may need to search names manually, resolve registration issues at the door, and update attendance by hand. This can cause long entry lines, ticket misuse, duplicate entry, and poor live visibility into attendance.
+We chose TicketGate because event entry is a familiar real-world workflow that still breaks down easily when handled with forms, spreadsheets, and manual check-in. That approach may be acceptable while attendance is small, but it becomes unreliable during peak arrival time, when staff need to search names manually, resolve conflicts at the door, and update attendance after the fact. In practice, this can create long lines, duplicate entry, unclear ticket status, and poor visibility for organizers exactly when they need fast decisions.
 
-This problem is worth solving because a full-stack ticketing and check-in platform directly improves the highest-friction operational moment in in-person events. For organizers, it improves throughput, attendance visibility, and event management. For staff, it provides immediate validation feedback. For attendees, it shortens entry time and reduces confusion around ticket status.
+The problem is significant because check-in is the most time-sensitive part of an in-person event. A reliable ticketing and validation system improves the experience for every role involved. Organizers need visibility into capacity, ticket usage, and staff operations. Staff need a fast and unambiguous way to validate entry. Attendees need a simple ticket flow that reduces confusion and waiting time. A QR-based workflow with server-side validation directly addresses that operational bottleneck.
 
-This project was also a strong fit for the course because the real-world workflow naturally requires the course’s core skills: authenticated access control, relational database design, cloud-based file handling, and real-time updates. The spreadsheet-error literature also shows that spreadsheet mistakes are common enough to represent real operational risk in practice.[1][2]
+This project was also a strong match for the course because the problem naturally requires the major skills we wanted to practice in one integrated system: authenticated role-based access, relational data modeling, secure API design, cloud-style file handling, and real-time updates. The spreadsheet-error literature also supports the motivation for moving beyond manual workflows, since spreadsheet-based processes are known to be error-prone in operational settings.[1][2]
 
 ### Target Users
 
@@ -37,54 +37,57 @@ This project was also a strong fit for the course because the real-world workflo
 
 ## 3. Objectives
 
-The main objective of TicketGate was to build a complete event workflow with the following path:
+The main objective of TicketGate was to implement a complete and testable event workflow:
 
-**create event → configure ticket type → assign staff → claim ticket → generate QR/token → validate at entry → record check-in → update live dashboard**
+**create event → configure ticket types → assign staff → claim ticket → generate QR/token → validate at entry → record check-in → update the organizer dashboard**
 
-More specifically, our team aimed to:
+To achieve that goal, we defined the following concrete objectives for the MVP:
 
-- support authenticated access for Organizer, Staff, and Attendee roles
-- allow organizers to create and edit events
-- allow organizers to configure ticket types for each event
-- allow attendees to claim tickets and view them in **My Tickets**
-- support secure one-time validation using an opaque QR/token value
-- prevent duplicate ticket use
-- show live attendance information in a real-time dashboard
-- support cloud-based file handling for event poster assets
+- support authenticated access for three roles: Organizer, Staff, and Attendee
+- allow organizers to create, edit, and manage events and ticket types
+- allow attendees to claim tickets and retrieve them later through **My Tickets**
+- generate a unique opaque token for each ticket so that validation does not depend on guessable identifiers
+- enforce one-time ticket use and clearly handle duplicate, invalid, cancelled, and wrong-event scans
+- provide organizers with live attendance visibility through Socket.IO-based dashboard updates
+- support poster upload and download through S3-compatible object storage and database-linked file metadata
+- keep the codebase modular enough that routing, business logic, persistence, and real-time features remain easy to reason about
 
-To keep the project manageable, we focused on the core lifecycle and intentionally kept payments, discount codes, email notifications, advanced analytics, and other larger platform features out of scope for the MVP.
+We intentionally kept payments, discount codes, email notifications, waitlists, and advanced analytics out of scope. That decision let us focus on delivering a stable core lifecycle first, which was the most important measure of success for the project.
 
 ---
 
 ## 4. Technical Stack
 
-Our implementation follows a **separate frontend and backend architecture**.
+We chose the **Express.js Backend** path rather than the Next.js full-stack path. The application benefits from a clear separation between the browser client, the REST API, the database layer, and the real-time Socket.IO server, especially because the system has multiple roles, event-specific authorization rules, and direct-to-storage file-upload flows.
+
+Our implementation therefore follows a **separate frontend and backend architecture**.
 
 ### Frontend
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- Redux Toolkit
-- Axios
-- React Router
-- Socket.IO client
+- React 19 with TypeScript for a typed component-based UI
+- Vite for local development and frontend builds
+- React Router for page routing and protected navigation
+- Redux Toolkit for shared auth, event, and scanner state
+- Axios for HTTP communication with the backend API
+- Socket.IO client for real-time dashboard updates
+- `@zxing/browser` for camera-based QR scanning
+- Tailwind CSS v4 for styling
 
 ### Backend
 
-- Express.js
-- TypeScript
-- Prisma ORM
-- JWT-based authentication and authorization middleware
-- Socket.IO for real-time updates
-- Swagger / OpenAPI documentation
+- Express.js with TypeScript for the REST API
+- Prisma ORM for typed database access and schema-driven development
+- JWT-based authentication, role-aware authorization checks, and `bcryptjs` password hashing
+- Zod for request validation
+- Socket.IO for authorized real-time event-room updates
 
 ### Database and Storage
 
-- PostgreSQL for relational data
-- S3-compatible object storage for event poster file handling
-- `[TODO: add exact local/dev storage service if used, e.g. MinIO]`
+- PostgreSQL as the primary relational database for users, events, ticket types, tickets, check-ins, staff assignments, and file metadata
+- Docker Compose with PostgreSQL 16 for local database setup
+- S3-compatible object storage for event poster uploads and downloads
+- AWS SDK v3 with pre-signed upload/download URLs for direct file transfer
+- MinIO-compatible local development configuration through `S3_ENDPOINT=http://localhost:9000`
 
 ### Architectural Approach
 
@@ -94,7 +97,7 @@ The backend uses a three-layer structure:
 - **Services** for application logic
 - **Clients** for database and storage access
 
-This separation helped keep the codebase organized and made it easier to debug, test, and extend features.
+On the frontend, we similarly separated pages, API helpers, store slices, and socket helpers. This structure kept the codebase easier to debug, made role-based behavior more explicit, and reduced coupling between UI code and backend-specific details.
 
 ---
 
@@ -439,4 +442,3 @@ Overall, TicketGate achieved the main goals we set for the project: a separate R
 [4] Eventbrite, “Pricing and features for organizers (Canada),” *Eventbrite Organizer Pricing*.
 
 [5] Ticket Fairy, “Preventing Ticket Fraud and Scalping at Festivals,” Jul. 11, 2025, updated Jan. 22, 2026.
-
