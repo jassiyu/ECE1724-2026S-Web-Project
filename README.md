@@ -3,6 +3,7 @@
 TicketGate is a full-stack web application for event ticketing and QR-based check-in. It supports three user roles—Organizer, Staff, and Attendee—and provides an end-to-end workflow from event creation to ticket claiming, ticket validation, and live attendance tracking.
 
 **Demo Video:** https://youtu.be/cncAPXw_L1s 
+
 **AI Session Log:** [ai-session.md](ai-session.md)
 
 ---
